@@ -3,7 +3,7 @@
 echo "=== Test 1: Login with JWT ==="
 JWT_RESPONSE=$(curl -s -X POST http://localhost:8000/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"jSmiVnQZ5LL0m-8x"}')
+  -d '{"username":"admin","password":"c6WmpvrnGj8ti95w"}')
 echo "$JWT_RESPONSE" | jq
 JWT_TOKEN=$(echo "$JWT_RESPONSE" | jq -r '.token')
 

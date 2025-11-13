@@ -93,7 +93,7 @@ Conditional Auth (API Key for Traefik):
 - GET  /api/config                          # Traefik HTTP provider endpoint
 
 Protected Endpoints (JWT Required):
-- GET    /api/{protocol}/{type}                    # List resources
+- GET    /api/{protocol}/{type}                    # List resources (supports ?traefik=true|false)
 - GET    /api/{protocol}/{type}/{nameProvider}     # Get resource
 - POST   /api/{protocol}/{type}                    # Create resource
 - PUT    /api/{protocol}/{type}/{nameProvider}     # Update resource
@@ -103,6 +103,25 @@ Protected Endpoints (JWT Required):
 - GET    /api/http/provider                        # List API keys
 - POST   /api/http/provider                        # Create API key
 - DELETE /api/http/provider/{id}                   # Delete API key
+```
+
+### Query Parameters
+
+The List Resources endpoint (`GET /api/{protocol}/{type}`) supports an optional `traefik` query parameter:
+
+- **traefik=false** (default): Returns only resources from the local database
+- **traefik=true**: Returns resources from both database and Traefik API (merged)
+
+Examples:
+```bash
+# Get only database resources (default)
+curl -H "Authorization: Bearer $JWT" http://localhost:8000/api/http/routers
+
+# Explicitly request only database resources
+curl -H "Authorization: Bearer $JWT" http://localhost:8000/api/http/routers?traefik=false
+
+# Get merged resources from database and Traefik
+curl -H "Authorization: Bearer $JWT" http://localhost:8000/api/http/routers?traefik=true
 ```
 
 ### Protocol and Resource Types
@@ -144,7 +163,9 @@ Resources are identified by `name@provider` format (e.g., `my-router@http`). Whe
 
 - **User**: Admin users with bcrypt-hashed passwords
 - **APIKey**: Standalone API keys for Traefik polling (not linked to users)
-- **TraefikConfig**: Stores resource configurations with composite primary key (name, provider)
+- **TraefikConfig**: Stores resource configurations with composite primary key (name, provider, protocol, type)
+  - This allows the same resource name to exist across different protocols and types
+  - Example: `test-router` can exist as both HTTP router and TCP router simultaneously
 
 ### JSON Schema Validation
 

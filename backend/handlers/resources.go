@@ -25,6 +25,9 @@ func NewResourceHandler(db *gorm.DB) *ResourceHandler {
 }
 
 // ListResources handles GET /api/{protocol}/{type}
+// Query param: traefik=true|false (default: false)
+// - false: returns only resources from database
+// - true: returns resources from both database and Traefik
 func (h *ResourceHandler) ListResources(c *gin.Context) {
 	protocol := c.Param("protocol")
 	resourceType := c.Param("type")
@@ -41,12 +44,8 @@ func (h *ResourceHandler) ListResources(c *gin.Context) {
 		return
 	}
 
-	// Fetch from Traefik
-	traefikResources, err := h.traefikClient.GetResources(protocol, resourceType)
-	if err != nil {
-		// Log error but continue - Traefik might not be available
-		traefikResources = make([]interface{}, 0)
-	}
+	// Check traefik query parameter (default: false)
+	includeTraefik := c.DefaultQuery("traefik", "false") == "true"
 
 	// Fetch from database
 	var dbConfigs []models.TraefikConfig
@@ -55,11 +54,20 @@ func (h *ResourceHandler) ListResources(c *gin.Context) {
 	// Create a map to track resources by name@provider
 	resourceMap := make(map[string]interface{})
 
-	// Add Traefik resources first
-	for _, res := range traefikResources {
-		if resMap, ok := res.(map[string]interface{}); ok {
-			if name, nameExists := resMap["name"].(string); nameExists {
-				resourceMap[name] = resMap
+	// Only fetch from Traefik if traefik=true
+	if includeTraefik {
+		traefikResources, err := h.traefikClient.GetResources(protocol, resourceType)
+		if err != nil {
+			// Log error but continue - Traefik might not be available
+			traefikResources = make([]interface{}, 0)
+		}
+
+		// Add Traefik resources first
+		for _, res := range traefikResources {
+			if resMap, ok := res.(map[string]interface{}); ok {
+				if name, nameExists := resMap["name"].(string); nameExists {
+					resourceMap[name] = resMap
+				}
 			}
 		}
 	}

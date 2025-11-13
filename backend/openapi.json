@@ -54,7 +54,7 @@
           },
           "password": {
             "type": "string",
-            "example": "jSmiVnQZ5LL0m-8x"
+            "example": "2FRUPX_OnnO_Q1OE"
           }
         }
       },
@@ -345,6 +345,17 @@
         },
         "description": "API key ID",
         "example": 1
+      },
+      "TraefikQueryParam": {
+        "name": "traefik",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": false
+        },
+        "description": "Include resources from Traefik API. Default is false (only database resources).",
+        "example": false
       }
     }
   },
@@ -489,7 +500,7 @@
     "/api/{protocol}/{type}": {
       "get": {
         "summary": "List Resources",
-        "description": "List all resources of the specified protocol and type. Merges resources from Traefik API and local database.",
+        "description": "List resources of the specified protocol and type. By default (traefik=false), returns only resources from the local database. Set traefik=true to include resources from both database and Traefik API.",
         "operationId": "listResources",
         "tags": ["Resources"],
         "parameters": [
@@ -498,6 +509,9 @@
           },
           {
             "$ref": "#/components/parameters/TypeParam"
+          },
+          {
+            "$ref": "#/components/parameters/TraefikQueryParam"
           }
         ],
         "responses": {
