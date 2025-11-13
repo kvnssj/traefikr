@@ -1,0 +1,122 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "entryPoints": {
+      "title": "Entry Points",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The list of entry points to which the router is attached. If not specified, HTTP routers are attached to all entry points."
+    },
+    "rule": {
+      "title": "Rule",
+      "type": "string",
+      "description": "Rules are a set of matchers configured with values, that determine if a particular request matches specific criteria."
+    },
+    "priority": {
+      "title": "Priority",
+      "type": "integer",
+      "description": "To avoid path overlap, routes are sorted, by default, in descending order using rules length."
+    },
+    "middlewares": {
+      "title": "Middlewares",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The list of middlewares that are applied to the router. Middlewares are applied in the order they are declared."
+    },
+    "service": {
+      "title": "Service",
+      "type": "string",
+      "description": "The name of the service that will handle the matched requests."
+    },
+    "tls": {
+      "title": "TLS Configuration",
+      "type": "object",
+      "properties": {
+        "certResolver": {
+          "title": "Certificate Resolver",
+          "type": "string",
+          "description": "The name of the certificate resolver to use for automatic certificate generation."
+        },
+        "options": {
+          "title": "TLS Options",
+          "type": "string",
+          "description": "The name of the TLS options to use for configuring TLS parameters."
+        },
+        "domains": {
+          "title": "Domains",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "main": {
+                "title": "Main Domain",
+                "type": "string",
+                "description": "Main domain name"
+              },
+              "sans": {
+                "title": "Subject Alternative Names",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Subject Alternative Names"
+              }
+            },
+            "required": ["main"]
+          },
+          "description": "List of domains and Subject Alternative Names (SANs) for explicit certificate domain specification."
+        }
+      },
+      "additionalProperties": false,
+      "description": "TLS configuration for the router. When specified, the router will only handle HTTPS requests."
+    },
+    "observability": {
+      "title": "Observability",
+      "type": "object",
+      "properties": {
+        "accessLogs": {
+          "title": "Access Logs",
+          "type": "boolean",
+          "default": true,
+          "description": "Controls whether the router will produce access-logs."
+        },
+        "metrics": {
+          "title": "Metrics",
+          "type": "boolean",
+          "default": true,
+          "description": "Controls whether the router will produce metrics."
+        },
+        "tracing": {
+          "title": "Tracing",
+          "type": "boolean",
+          "default": true,
+          "description": "Controls whether the router will produce traces."
+        },
+        "traceVerbosity": {
+          "title": "Trace Verbosity",
+          "type": "string",
+          "enum": ["minimal", "detailed"],
+          "default": "minimal",
+          "description": "Sets tracing detail level for the router."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Observability configuration for the router."
+    },
+    "parentRefs": {
+      "title": "Parent References",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "References to parent router names for multi-layer routing."
+    }
+  },
+  "required": ["rule", "service"],
+  "additionalProperties": false
+}

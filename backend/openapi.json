@@ -1,0 +1,986 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Traefikr API",
+    "description": "Traefik configuration management API with comprehensive JSON schema validation",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Traefikr API Support"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000",
+      "description": "Local development server"
+    }
+  ],
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT token obtained from /api/auth/login endpoint"
+      },
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-auth-key",
+        "description": "API key for Traefik polling (only used for /api/config endpoint)"
+      }
+    },
+    "schemas": {
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "ok"
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": ["username", "password"],
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "admin"
+          },
+          "password": {
+            "type": "string",
+            "example": "jSmiVnQZ5LL0m-8x"
+          }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "JWT token for authentication",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "message": {
+            "type": "string",
+            "example": "Logged in successfully"
+          }
+        }
+      },
+      "TraefikConfig": {
+        "type": "object",
+        "properties": {
+          "http": {
+            "type": "object",
+            "properties": {
+              "routers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "services": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "middlewares": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "serversTransport": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "tls": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          },
+          "tcp": {
+            "type": "object",
+            "properties": {
+              "routers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "services": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "middlewares": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "serversTransport": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "tls": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          },
+          "udp": {
+            "type": "object",
+            "properties": {
+              "routers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "services": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "middlewares": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      },
+      "Resource": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "my-router@http"
+          },
+          "provider": {
+            "type": "string",
+            "example": "http"
+          },
+          "protocol": {
+            "type": "string",
+            "enum": ["http", "tcp", "udp"],
+            "example": "http"
+          },
+          "type": {
+            "type": "string",
+            "example": "routers"
+          },
+          "enabled": {
+            "type": "boolean",
+            "example": true
+          },
+          "config": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "CreateResourceRequest": {
+        "type": "object",
+        "required": ["name", "provider", "config"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "my-router"
+          },
+          "provider": {
+            "type": "string",
+            "example": "http"
+          },
+          "enabled": {
+            "type": "boolean",
+            "example": true
+          },
+          "config": {
+            "type": "object",
+            "additionalProperties": true,
+            "example": {
+              "rule": "Host(`example.com`)",
+              "service": "my-service@http"
+            }
+          }
+        }
+      },
+      "UpdateResourceRequest": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "example": true
+          },
+          "config": {
+            "type": "object",
+            "additionalProperties": true,
+            "example": {
+              "rule": "Host(`example.com`)",
+              "service": "my-service@http"
+            }
+          }
+        }
+      },
+      "Entrypoint": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "web"
+          },
+          "address": {
+            "type": "string",
+            "example": ":80"
+          }
+        },
+        "additionalProperties": true
+      },
+      "APIKey": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "Production API Key"
+          },
+          "key": {
+            "type": "string",
+            "example": "sk_xxxxx..."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-11-12T23:39:19Z"
+          }
+        }
+      },
+      "CreateAPIKeyRequest": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Production API Key"
+          }
+        }
+      },
+      "CreateAPIKeyResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "Production API Key"
+          },
+          "key": {
+            "type": "string",
+            "example": "sk_abc123def456..."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-11-12T23:39:19Z"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "Resource not found"
+          }
+        }
+      }
+    },
+    "parameters": {
+      "ProtocolParam": {
+        "name": "protocol",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "enum": ["http", "tcp", "udp"]
+        },
+        "description": "Protocol type (http, tcp, or udp)"
+      },
+      "TypeParam": {
+        "name": "type",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Resource type (routers, services, middlewares, serversTransport, tls)",
+        "example": "routers"
+      },
+      "NameProviderParam": {
+        "name": "nameProvider",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Resource identifier in format 'name@provider'",
+        "example": "my-router@http"
+      },
+      "EntrypointNameParam": {
+        "name": "name",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Entrypoint name",
+        "example": "web"
+      },
+      "APIKeyIDParam": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer"
+        },
+        "description": "API key ID",
+        "example": 1
+      }
+    }
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "description": "Check if the API is healthy and responding",
+        "operationId": "healthCheck",
+        "security": [],
+        "tags": ["Health"],
+        "responses": {
+          "200": {
+            "description": "API is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Login",
+        "description": "Authenticate with username and password to receive a JWT token. Use this token in the Authorization header for all protected endpoints.",
+        "operationId": "login",
+        "security": [],
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/config": {
+      "get": {
+        "summary": "Get Traefik Configuration",
+        "description": "Returns the complete Traefik configuration in HTTP provider format for Traefik to poll. Requires x-auth-key header if API keys exist in the database. Public (no auth) if no API keys exist (bootstrap mode).",
+        "operationId": "getConfig",
+        "tags": ["Configuration"],
+        "security": [
+          {},
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Traefik configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TraefikConfig"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{protocol}/{type}/schema.json": {
+      "get": {
+        "summary": "Get JSON Schema",
+        "description": "Returns the JSON schema for validating resources of the specified protocol and type",
+        "operationId": "getSchema",
+        "tags": ["Schemas"],
+        "security": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProtocolParam"
+          },
+          {
+            "$ref": "#/components/parameters/TypeParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "JSON schema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid protocol or type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{protocol}/{type}": {
+      "get": {
+        "summary": "List Resources",
+        "description": "List all resources of the specified protocol and type. Merges resources from Traefik API and local database.",
+        "operationId": "listResources",
+        "tags": ["Resources"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProtocolParam"
+          },
+          {
+            "$ref": "#/components/parameters/TypeParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of resources",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Resource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create Resource",
+        "description": "Create a new resource with JSON schema validation",
+        "operationId": "createResource",
+        "tags": ["Resources"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProtocolParam"
+          },
+          {
+            "$ref": "#/components/parameters/TypeParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateResourceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Resource created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Resource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Resource already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{protocol}/{type}/{nameProvider}": {
+      "get": {
+        "summary": "Get Resource",
+        "description": "Get a specific resource by name and provider",
+        "operationId": "getResource",
+        "tags": ["Resources"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProtocolParam"
+          },
+          {
+            "$ref": "#/components/parameters/TypeParam"
+          },
+          {
+            "$ref": "#/components/parameters/NameProviderParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resource details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Resource"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update Resource",
+        "description": "Update an existing resource with JSON schema validation",
+        "operationId": "updateResource",
+        "tags": ["Resources"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProtocolParam"
+          },
+          {
+            "$ref": "#/components/parameters/TypeParam"
+          },
+          {
+            "$ref": "#/components/parameters/NameProviderParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateResourceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Resource updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Resource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Resource",
+        "description": "Delete a resource by name and provider",
+        "operationId": "deleteResource",
+        "tags": ["Resources"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProtocolParam"
+          },
+          {
+            "$ref": "#/components/parameters/TypeParam"
+          },
+          {
+            "$ref": "#/components/parameters/NameProviderParam"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Resource deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/entrypoints": {
+      "get": {
+        "summary": "List Entrypoints",
+        "description": "List all entrypoints from Traefik API (read-only)",
+        "operationId": "listEntrypoints",
+        "tags": ["Entrypoints"],
+        "responses": {
+          "200": {
+            "description": "List of entrypoints",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Entrypoint"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/entrypoints/{name}": {
+      "get": {
+        "summary": "Get Entrypoint",
+        "description": "Get a specific entrypoint from Traefik API (read-only)",
+        "operationId": "getEntrypoint",
+        "tags": ["Entrypoints"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntrypointNameParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entrypoint details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Entrypoint"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Entrypoint not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/http/provider": {
+      "get": {
+        "summary": "List API Keys",
+        "description": "List all API keys (keys are masked except first 8 characters)",
+        "operationId": "listAPIKeys",
+        "tags": ["API Keys"],
+        "responses": {
+          "200": {
+            "description": "List of API keys",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/APIKey"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create API Key",
+        "description": "Create a new API key. The full key is only shown once in the response.",
+        "operationId": "createAPIKey",
+        "tags": ["API Keys"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAPIKeyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "API key created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateAPIKeyResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/http/provider/{id}": {
+      "delete": {
+        "summary": "Delete API Key",
+        "description": "Delete an API key by ID",
+        "operationId": "deleteAPIKey",
+        "tags": ["API Keys"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/APIKeyIDParam"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "API key deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "API key not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Health",
+      "description": "Health check endpoints"
+    },
+    {
+      "name": "Authentication",
+      "description": "Authentication endpoints for obtaining JWT tokens"
+    },
+    {
+      "name": "Configuration",
+      "description": "Traefik configuration endpoints"
+    },
+    {
+      "name": "Schemas",
+      "description": "JSON schema endpoints for validation"
+    },
+    {
+      "name": "Resources",
+      "description": "CRUD operations for Traefik resources (routers, services, middlewares, etc.)"
+    },
+    {
+      "name": "Entrypoints",
+      "description": "Read-only entrypoint information from Traefik"
+    },
+    {
+      "name": "API Keys",
+      "description": "API key management"
+    }
+  ]
+}

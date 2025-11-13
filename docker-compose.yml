@@ -1,0 +1,45 @@
+services:
+  traefik:
+    image: traefik:v3.6
+    container_name: traefikr-traefik
+    command:
+      - "--api.insecure=true"
+      - "--api.dashboard=true"
+      - "--providers.http.endpoint=http://backend:8080/api/config"
+      - "--providers.http.headers.x-auth-key=sk_NciXsckKuzOtzyowvyQlnhTQVEkW4ZtxTnMS9OdFFro="
+      - "--providers.http.pollInterval=5s"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--log.level=DEBUG"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"  # Traefik API & Dashboard
+    networks:
+      - traefikr
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: traefikr-backend
+    environment:
+      - DB_PATH=/data/traefikr.db
+      - PORT=8080
+      - TRAEFIK_API_URL=http://traefik:8080
+    ports:
+      - "8000:8080"  # Expose backend API on host port 8000
+    volumes:
+      - backend-data:/data
+    networks:
+      - traefikr
+    restart: unless-stopped
+
+networks:
+  traefikr:
+    driver: bridge
+
+volumes:
+  backend-data:

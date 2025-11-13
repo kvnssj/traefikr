@@ -1,0 +1,111 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "minVersion": {
+      "title": "Minimum TLS Version",
+      "type": "string",
+      "enum": [
+        "VersionTLS10",
+        "VersionTLS11",
+        "VersionTLS12",
+        "VersionTLS13"
+      ],
+      "description": "Specifies the minimum TLS version"
+    },
+    "maxVersion": {
+      "title": "Maximum TLS Version",
+      "type": "string",
+      "enum": [
+        "VersionTLS10",
+        "VersionTLS11",
+        "VersionTLS12",
+        "VersionTLS13"
+      ],
+      "description": "Specifies the maximum TLS version"
+    },
+    "cipherSuites": {
+      "title": "Cipher Suites",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of cipher suite names (e.g., TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256)"
+    },
+    "curvePreferences": {
+      "title": "Curve Preferences",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "CurveP521",
+          "CurveP384",
+          "CurveP256",
+          "X25519",
+          "secp521r1",
+          "secp384r1",
+          "secp256r1"
+        ]
+      },
+      "description": "Preferred elliptic curves using either crypto names or RFC-defined names"
+    },
+    "sniStrict": {
+      "title": "SNI Strict",
+      "type": "boolean",
+      "default": false,
+      "description": "Enables strict SNI checking"
+    },
+    "alpnProtocols": {
+      "title": "ALPN Protocols",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": ["h2", "http/1.1", "acme-tls/1"],
+      "description": "Array of supported application protocols for TLS handshake"
+    },
+    "disableSessionTickets": {
+      "title": "Disable Session Tickets",
+      "type": "boolean",
+      "default": false,
+      "description": "Disables session tickets, forcing full TLS handshakes"
+    },
+    "clientAuth": {
+      "title": "Client Authentication",
+      "type": "object",
+      "properties": {
+        "caFiles": {
+          "title": "CA Files",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Array of PEM-format certificate authority files"
+        },
+        "clientAuthType": {
+          "title": "Client Auth Type",
+          "type": "string",
+          "enum": [
+            "NoClientCert",
+            "RequestClientCert",
+            "RequireAnyClientCert",
+            "VerifyClientCertIfGiven",
+            "RequireAndVerifyClientCert"
+          ],
+          "description": "Authentication mode for client certificates"
+        },
+        "secretNames": {
+          "title": "Secret Names",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Kubernetes-specific CA certificate references"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Client authentication configuration for mTLS"
+    }
+  },
+  "additionalProperties": false
+}

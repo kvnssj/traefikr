@@ -1,0 +1,98 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "dialTimeout": {
+      "title": "Dial Timeout",
+      "type": "string",
+      "description": "Defines the timeout when dialing the backend TCP service. If zero, no timeout exists. (default: 30s)"
+    },
+    "dialKeepAlive": {
+      "title": "Dial Keep Alive",
+      "type": "string",
+      "description": "Defines the interval between keep-alive probes for an active network connection. (default: 15s)"
+    },
+    "terminationDelay": {
+      "title": "Termination Delay",
+      "type": "string",
+      "description": "Sets time limit for proxy to fully terminate connections after initiating termination sequence. Negative value means no deadline. (default: 100ms)"
+    },
+    "proxyProtocol": {
+      "title": "Proxy Protocol",
+      "type": "object",
+      "properties": {
+        "version": {
+          "title": "Version",
+          "type": "integer",
+          "enum": [1, 2],
+          "default": 2,
+          "description": "PROXY protocol version to use (1 or 2). Traefik supports PROXY Protocol versions 1 and 2 on TCP services."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Proxy Protocol configuration. An empty section enables version 2 by default."
+    },
+    "tls": {
+      "title": "TLS",
+      "type": "object",
+      "properties": {
+        "serverName": {
+          "title": "Server Name",
+          "type": "string",
+          "description": "Server name used for SNI (Server Name Indication) configuration"
+        },
+        "certificates": {
+          "title": "Certificates",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "File paths or data bytes for client mTLS certificates"
+        },
+        "insecureSkipVerify": {
+          "title": "Insecure Skip Verify",
+          "type": "boolean",
+          "default": false,
+          "description": "Controls server certificate chain and hostname verification. When true, accepts any certificate presented by the server."
+        },
+        "rootCAs": {
+          "title": "Root CAs",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Root certificate authorities for server certificate verification in mTLS scenarios"
+        },
+        "peerCertURI": {
+          "title": "Peer Certificate URI",
+          "type": "string",
+          "description": "URI matched against SAN URIs during server certificate verification"
+        }
+      },
+      "additionalProperties": false,
+      "description": "TLS configuration for connections to backend servers. An empty section enables TLS with default settings."
+    },
+    "spiffe": {
+      "title": "SPIFFE",
+      "type": "object",
+      "properties": {
+        "ids": {
+          "title": "IDs",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of allowed SPIFFE IDs. Takes precedence over trust domain when specified."
+        },
+        "trustDomain": {
+          "title": "Trust Domain",
+          "type": "string",
+          "description": "Allowed SPIFFE trust domain for server identity verification"
+        }
+      },
+      "additionalProperties": false,
+      "description": "SPIFFE configuration for service identity verification. An empty section enables SPIFFE and allows any ID. SPIFFE requires prior enablement in install configuration before use."
+    }
+  },
+  "additionalProperties": false
+}

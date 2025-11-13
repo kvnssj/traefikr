@@ -1,0 +1,148 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$defs": {
+    "loadBalancerHealthCheck": {
+      "title": "Health Check",
+      "type": "object",
+      "properties": {
+        "port": {
+          "title": "Port",
+          "type": "integer",
+          "description": "Replaces the server address port for health check probes"
+        },
+        "send": {
+          "title": "Send",
+          "type": "string",
+          "description": "Payload to send during the health check"
+        },
+        "expect": {
+          "title": "Expect",
+          "type": "string",
+          "description": "Expected response payload from the server"
+        },
+        "interval": {
+          "title": "Interval",
+          "type": "string",
+          "description": "Frequency of health checks for healthy targets (default: 30s)"
+        },
+        "unhealthyInterval": {
+          "title": "Unhealthy Interval",
+          "type": "string",
+          "description": "Frequency of health checks for unhealthy targets (default: 30s)"
+        },
+        "timeout": {
+          "title": "Timeout",
+          "type": "string",
+          "description": "Maximum wait duration for health check response (default: 5s)"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Configures health check mechanism to remove unhealthy servers from the load balancing rotation"
+    },
+    "weightedHealthCheck": {
+      "title": "Health Check",
+      "type": "object",
+      "description": "Activates health monitoring for child services. All child services must have HealthCheck enabled if parent enables it."
+    }
+  },
+  "type": "object",
+  "properties": {
+    "loadBalancer": {
+      "title": "Load Balancer",
+      "type": "object",
+      "properties": {
+        "servers": {
+          "title": "Servers",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "address": {
+                "title": "Address",
+                "type": "string",
+                "description": "IP:Port pointing to a specific backend instance"
+              },
+              "tls": {
+                "title": "TLS",
+                "type": "boolean",
+                "default": false,
+                "description": "Enable TLS when dialing with the backend"
+              }
+            },
+            "required": ["address"],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "description": "Declares instances of your backend program"
+        },
+        "serversTransport": {
+          "title": "Servers Transport",
+          "type": "string",
+          "description": "Reference to a TCP ServersTransport configuration for the communication between Traefik and your servers"
+        },
+        "healthCheck": {
+          "$ref": "#/$defs/loadBalancerHealthCheck"
+        },
+        "proxyProtocol": {
+          "title": "Proxy Protocol",
+          "type": "object",
+          "properties": {
+            "version": {
+              "title": "Version",
+              "type": "integer",
+              "enum": [1, 2],
+              "description": "PROXY protocol version to use (1 or 2)"
+            }
+          },
+          "additionalProperties": false,
+          "description": "Configures the PROXY protocol to pass client connection information to the backend"
+        },
+        "terminationDelay": {
+          "title": "Termination Delay",
+          "type": "integer",
+          "description": "Duration in milliseconds to wait before fully terminating the connection"
+        }
+      },
+      "required": ["servers"],
+      "additionalProperties": false,
+      "description": "Load balances TCP connections between multiple backend servers"
+    },
+    "weighted": {
+      "title": "Weighted Round Robin",
+      "type": "object",
+      "properties": {
+        "services": {
+          "title": "Services",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "title": "Name",
+                "type": "string",
+                "description": "The referenced service identifier"
+              },
+              "weight": {
+                "title": "Weight",
+                "type": "integer",
+                "minimum": 0,
+                "description": "Numeric value determining traffic distribution ratio"
+              }
+            },
+            "required": ["name", "weight"],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "description": "Array of child services with their traffic distribution weights"
+        },
+        "healthCheck": {
+          "$ref": "#/$defs/weightedHealthCheck"
+        }
+      },
+      "required": ["services"],
+      "additionalProperties": false,
+      "description": "Weighted round robin service for load balancing TCP connections between multiple services based on provided weights"
+    }
+  },
+  "additionalProperties": false
+}

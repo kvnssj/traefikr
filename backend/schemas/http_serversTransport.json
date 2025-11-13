@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "serverName": {
+      "title": "Server Name",
+      "type": "string",
+      "description": "Configures the server name that will be used as the SNI"
+    },
+    "certificates": {
+      "title": "Certificates",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Defines the list of certificates (as file paths, or data bytes) that will be set as client certificates for mTLS"
+    },
+    "insecureSkipVerify": {
+      "title": "Insecure Skip Verify",
+      "type": "boolean",
+      "default": false,
+      "description": "Controls whether the server's certificate chain and host name is verified"
+    },
+    "rootCAs": {
+      "title": "Root CAs",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Set of root certificate authorities to use when verifying server certificates (for mTLS connections)"
+    },
+    "maxIdleConnsPerHost": {
+      "title": "Max Idle Connections Per Host",
+      "type": "integer",
+      "default": 200,
+      "description": "Maximum idle (keep-alive) connections to keep per-host"
+    },
+    "disableHTTP2": {
+      "title": "Disable HTTP/2",
+      "type": "boolean",
+      "default": false,
+      "description": "Disables HTTP/2 for connections with servers"
+    },
+    "peerCertURI": {
+      "title": "Peer Certificate URI",
+      "type": "string",
+      "description": "Defines the URI used to match against SAN URIs during the server's certificate verification"
+    },
+    "forwardingTimeouts": {
+      "title": "Forwarding Timeouts",
+      "type": "object",
+      "properties": {
+        "dialTimeout": {
+          "title": "Dial Timeout",
+          "type": "string",
+          "default": "30s",
+          "description": "Amount of time to wait until a connection to a server can be established (0 = no timeout)"
+        },
+        "responseHeaderTimeout": {
+          "title": "Response Header Timeout",
+          "type": "string",
+          "default": "0s",
+          "description": "Amount of time to wait for a server's response headers after fully writing the request (0 = no timeout)"
+        },
+        "idleConnTimeout": {
+          "title": "Idle Connection Timeout",
+          "type": "string",
+          "default": "90s",
+          "description": "Maximum amount of time an idle (keep-alive) connection will remain idle before closing itself (0 = no timeout)"
+        },
+        "readIdleTimeout": {
+          "title": "Read Idle Timeout",
+          "type": "string",
+          "default": "0s",
+          "description": "Defines the timeout after which a health check using ping frame will be carried out if no frame is received on the HTTP/2 connection"
+        },
+        "pingTimeout": {
+          "title": "Ping Timeout",
+          "type": "string",
+          "default": "15s",
+          "description": "Defines the timeout after which the HTTP/2 connection will be closed if a response to ping is not received"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Timeout configuration for forwarding requests to servers"
+    },
+    "spiffe": {
+      "title": "SPIFFE",
+      "type": "object",
+      "properties": {
+        "ids": {
+          "title": "IDs",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Defines the allowed SPIFFE IDs. This takes precedence over the SPIFFE TrustDomain"
+        },
+        "trustDomain": {
+          "title": "Trust Domain",
+          "type": "string",
+          "description": "Defines the SPIFFE trust domain"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Defines the SPIFFE configuration. An empty spiffe section enables SPIFFE (that allows any SPIFFE ID)"
+    }
+  },
+  "additionalProperties": false
+}

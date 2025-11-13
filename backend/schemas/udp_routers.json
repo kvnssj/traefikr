@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "entryPoints": {
+      "title": "Entry Points",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The list of entry points to which the router is attached. If not specified, UDP routers are attached to all UDP entry points."
+    },
+    "service": {
+      "title": "Service",
+      "type": "string",
+      "description": "The name of the service that will handle the matched UDP packets"
+    }
+  },
+  "required": ["service"],
+  "additionalProperties": false
+}

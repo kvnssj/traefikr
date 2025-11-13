@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "loadBalancer": {
+      "title": "Load Balancer",
+      "type": "object",
+      "properties": {
+        "servers": {
+          "title": "Servers",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "address": {
+                "title": "Address",
+                "type": "string",
+                "description": "IP address and port combination (format: IP:Port) for the backend service instance"
+              }
+            },
+            "required": ["address"],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "description": "Defines all server instances for load balancing across the service"
+        }
+      },
+      "required": ["servers"],
+      "additionalProperties": false,
+      "description": "Load balances UDP packets between multiple backend servers"
+    }
+  },
+  "additionalProperties": false
+}
