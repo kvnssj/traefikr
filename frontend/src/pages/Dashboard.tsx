@@ -1,40 +1,96 @@
 import { useQuery } from '@tanstack/react-query'
 import { Card, Badge, Title, Text, Group, Stack, SimpleGrid, ThemeIcon, Container } from '@mantine/core'
-import { providersApi, routersApi, servicesApi, middlewaresApi } from '@/lib/api'
+import { providersApi, resourcesApi } from '@/lib/api'
 import { Network, Server, Shield, Layers, AlertCircle, CheckCircle } from 'lucide-react'
 
 export default function Dashboard() {
+  console.log('[DASHBOARD] Render')
+
   const { data: providers } = useQuery({
     queryKey: ['providers'],
     queryFn: async () => {
+      console.log('[DASHBOARD] Fetching providers')
       const response = await providersApi.list()
       return response.data
     }
   })
 
-  const { data: routers } = useQuery({
-    queryKey: ['routers'],
+  // Fetch HTTP routers
+  const { data: httpRouters = [] } = useQuery({
+    queryKey: ['resources', 'http', 'routers', true],
     queryFn: async () => {
-      const response = await routersApi.list()
+      const response = await resourcesApi.list('http', 'routers', true)
       return response.data
-    }
+    },
   })
 
-  const { data: services } = useQuery({
-    queryKey: ['services'],
+  // Fetch TCP routers
+  const { data: tcpRouters = [] } = useQuery({
+    queryKey: ['resources', 'tcp', 'routers', true],
     queryFn: async () => {
-      const response = await servicesApi.list()
+      const response = await resourcesApi.list('tcp', 'routers', true)
       return response.data
-    }
+    },
   })
 
-  const { data: middlewares } = useQuery({
-    queryKey: ['middlewares'],
+  // Fetch UDP routers
+  const { data: udpRouters = [] } = useQuery({
+    queryKey: ['resources', 'udp', 'routers', true],
     queryFn: async () => {
-      const response = await middlewaresApi.list()
+      const response = await resourcesApi.list('udp', 'routers', true)
       return response.data
-    }
+    },
   })
+
+  // Fetch HTTP services
+  const { data: httpServices = [] } = useQuery({
+    queryKey: ['resources', 'http', 'services', true],
+    queryFn: async () => {
+      const response = await resourcesApi.list('http', 'services', true)
+      return response.data
+    },
+  })
+
+  // Fetch TCP services
+  const { data: tcpServices = [] } = useQuery({
+    queryKey: ['resources', 'tcp', 'services', true],
+    queryFn: async () => {
+      const response = await resourcesApi.list('tcp', 'services', true)
+      return response.data
+    },
+  })
+
+  // Fetch UDP services
+  const { data: udpServices = [] } = useQuery({
+    queryKey: ['resources', 'udp', 'services', true],
+    queryFn: async () => {
+      const response = await resourcesApi.list('udp', 'services', true)
+      return response.data
+    },
+  })
+
+  // Fetch HTTP middlewares
+  const { data: httpMiddlewares = [] } = useQuery({
+    queryKey: ['resources', 'http', 'middlewares', true],
+    queryFn: async () => {
+      const response = await resourcesApi.list('http', 'middlewares', true)
+      return response.data
+    },
+  })
+
+  // Fetch TCP middlewares
+  const { data: tcpMiddlewares = [] } = useQuery({
+    queryKey: ['resources', 'tcp', 'middlewares', true],
+    queryFn: async () => {
+      const response = await resourcesApi.list('tcp', 'middlewares', true)
+      return response.data
+    },
+  })
+
+  // Combine all resources
+  const routers = [...httpRouters, ...tcpRouters, ...udpRouters]
+  const services = [...httpServices, ...tcpServices, ...udpServices]
+  const middlewares = [...httpMiddlewares, ...tcpMiddlewares]
 
   const stats = [
     {
@@ -144,7 +200,7 @@ export default function Dashboard() {
                   <div style={{ width: 8, height: 8, backgroundColor: 'var(--mantine-color-blue-6)', borderRadius: '50%' }}></div>
                   <Stack gap="xs">
                     <Text size="sm">Router: {router.name}</Text>
-                    <Text size="xs" c="dimmed">Rule: {router.rule}</Text>
+                    <Text size="xs" c="dimmed">Rule: {router.config?.rule || '-'}</Text>
                   </Stack>
                 </Group>
               ))}

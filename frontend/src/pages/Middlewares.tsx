@@ -18,6 +18,7 @@ import {
   Paper,
   Tabs,
   TextInput,
+  Alert,
 } from '@mantine/core'
 import {
   IconShield,
@@ -27,6 +28,7 @@ import {
   IconSearch,
   IconRouter,
   IconNetwork,
+  IconInfoCircle,
 } from '@tabler/icons-react'
 import { resourcesApi, Resource } from '@/lib/api'
 import { notifications } from '@mantine/notifications'
@@ -34,19 +36,42 @@ import { modals } from '@mantine/modals'
 import { ProviderIcon } from '@/components/ProviderIcon'
 import { StatusIcon } from '@/components/StatusIcon'
 
-// Detect middleware type from config keys
-function detectMiddlewareType(config: Record<string, any>): string {
-  if (!config) return 'unknown'
-  const keys = Object.keys(config)
-  return keys[0] || 'unknown'
+// Get middleware type - either from 'type' field (Traefik) or detect from config keys (database)
+function getMiddlewareType(middleware: Resource): string {
+  // Database middlewares have type as key in config object
+  if (middleware.config && Object.keys(middleware.config).length > 0) {
+    const keys = Object.keys(middleware.config)
+    return keys[0] || 'unknown'
+  }
+
+  // Traefik-sourced middlewares have a 'type' field (lowercase)
+  // We need to find the actual property key that matches this type (case-insensitive)
+  if ((middleware as any).type) {
+    const typeValue = (middleware as any).type as string
+    const middlewareObj = middleware as any
+
+    // Find the property key that matches the type (case-insensitive)
+    const matchingKey = Object.keys(middlewareObj).find(
+      key => key.toLowerCase() === typeValue.toLowerCase() && key !== 'type'
+    )
+
+    return matchingKey || typeValue
+  }
+
+  return 'unknown'
 }
 
-// Format middleware type label
-function formatTypeLabel(type: string): string {
-  return type
-    .replace(/([A-Z])/g, ' $1')
-    .replace(/^./, (str) => str.toUpperCase())
-    .trim()
+// Get middleware config body
+function getMiddlewareConfig(middleware: Resource): Record<string, any> {
+  const middlewareType = getMiddlewareType(middleware)
+
+  // For database middlewares, the config is nested under config property
+  if (middleware.config && Object.keys(middleware.config).length > 0) {
+    return middleware.config[middlewareType] || {}
+  }
+
+  // For Traefik-sourced middlewares, the config is directly on the resource
+  return (middleware as any)[middlewareType] || {}
 }
 
 export default function Middlewares() {
@@ -128,8 +153,8 @@ export default function Middlewares() {
 
   const renderMiddlewareCard = (protocol: string, middleware: Resource) => {
     const canEdit = middleware.source === 'database'
-    const middlewareType = detectMiddlewareType(middleware.config)
-    const typeLabel = formatTypeLabel(middlewareType)
+    const middlewareType = getMiddlewareType(middleware)
+    const middlewareConfig = getMiddlewareConfig(middleware)
 
     return (
       <Card key={middleware.name} shadow="sm" radius="md" withBorder>
@@ -143,7 +168,7 @@ export default function Middlewares() {
                 <Text fw={600}>{middleware.name.split('@')[0]}</Text>
                 <Group gap="xs" mt={4}>
                   <Badge size="sm" variant="light" color="cyan">
-                    {typeLabel}
+                    {middlewareType}
                   </Badge>
                   <ProviderIcon provider={middleware.provider} />
                 </Group>
@@ -177,19 +202,35 @@ export default function Middlewares() {
 
         <Card.Section p="lg" pt="xs">
           <Stack gap="sm">
+            {/* Internal middleware note */}
+            {middleware.provider === 'internal' && (
+              <Alert icon={<IconInfoCircle size={16} />} color="blue" variant="light">
+                <Text size="xs">Internal resource managed automatically by Traefik. Cannot be modified or deleted.</Text>
+              </Alert>
+            )}
+
+            {/* External provider note */}
+            {middleware.source !== 'database' && middleware.provider !== 'internal' && (
+              <Alert icon={<IconInfoCircle size={16} />} color="gray" variant="light">
+                <Text size="xs">
+                  Managed by the <strong>{middleware.provider}</strong> provider. Modifications must be made through the provider's configuration.
+                </Text>
+              </Alert>
+            )}
+
             <Group justify="space-between">
               <Text size="xs" fw={600} c="dimmed" tt="uppercase">
                 Configuration
               </Text>
               <StatusIcon
-                enabled={middleware.enabled}
+                enabled={middleware.status === 'enabled' || middleware.enabled}
                 enabledLabel="Enabled"
                 disabledLabel="Disabled"
               />
             </Group>
             <Paper p="sm" radius="sm" bg="gray.0">
               <Code block style={{ maxHeight: '150px', overflow: 'auto' }}>
-                {JSON.stringify(middleware.config, null, 2)}
+                {JSON.stringify(middlewareConfig, null, 2)}
               </Code>
             </Paper>
           </Stack>

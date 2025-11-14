@@ -3,6 +3,8 @@ FROM node:20
 WORKDIR /frontend
 
 # Only copy package files for dependency installation
+#COPY ./ /frontend
+
 COPY --chmod=0755 ./entrypoint.sh /entrypoint.sh
 
 # Expose the dev server port (will use environment variable)

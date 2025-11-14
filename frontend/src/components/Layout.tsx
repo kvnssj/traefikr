@@ -31,9 +31,9 @@ export default function Layout() {
     { path: '/services', label: 'Services', icon: IconServer },
     { path: '/middlewares', label: 'Middlewares', icon: IconSettings2 },
     { path: '/entrypoints', label: 'Entrypoints', icon: IconNetwork },
-    { path: '/transports', label: 'TCP Transports', icon: IconPlugConnected },
-    { path: '/tls', label: 'TLS', icon: IconLock },
-    { path: '/providers', label: 'Providers', icon: IconCloud },
+    { path: '/transports', label: 'Servers Transport', icon: IconPlugConnected },
+    // { path: '/tls', label: 'TLS', icon: IconLock },
+    { path: '/providers', label: 'Settings', icon: IconCloud },
   ]
 
   return (
@@ -56,26 +56,18 @@ export default function Layout() {
               size="sm"
             />
             <Group gap="xs">
-              <Box
-                component="div"
+              <img
+                src="/traefikr_logo.svg"
+                alt="Traefikr Logo"
                 style={{
                   width: 32,
-                  height: 32,
-                  borderRadius: 6,
-                  background: 'linear-gradient(135deg, #00aec1 0%, #00d4e6 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 'bold',
-                  color: 'white'
+                  height: 32
                 }}
-              >
-                T
-              </Box>
-              <Title order={3} c="white">Traefik Manager</Title>
+              />
+              <Title order={3} c="white">traefikr</Title>
             </Group>
           </Group>
-          
+
           <Menu shadow="md" width={200}>
             <Menu.Target>
               <Button variant="subtle" p="xs">
@@ -133,7 +125,7 @@ export default function Layout() {
 
         <AppShell.Section mt="auto">
           <Box style={{ padding: '8px', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
-            <Text size="xs" c="gray.5" ta="center">Traefik Manager v0.1.0</Text>
+            <Text size="xs" c="gray.5" ta="center">traefikr v0.1.0</Text>
           </Box>
         </AppShell.Section>
       </AppShell.Navbar>

@@ -22,6 +22,8 @@ import TLS from '@/pages/TLS'
 import TLSCertificateForm from '@/pages/TLSCertificateForm'
 import TLSOptionForm from '@/pages/TLSOptionForm'
 import Transports from '@/pages/Transports'
+import TransportTypeSelector from '@/pages/TransportTypeSelector'
+import HTTPServerTransportForm from '@/pages/HTTPServerTransportForm'
 import TCPServerTransportForm from '@/pages/TCPServerTransportForm'
 import HTTPProviderConfig from '@/pages/HTTPProviderConfig'
 import Login from '@/pages/Login'
@@ -29,6 +31,8 @@ import { AuthProvider } from '@/contexts/AuthContext'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 
 function App() {
+  console.log('[APP] Render')
+
   return (
     <AuthProvider>
       <Routes>
@@ -73,7 +77,10 @@ function App() {
           <Route path="tls/options/new" element={<TLSOptionForm />} />
           <Route path="tls/options/:name/edit" element={<TLSOptionForm />} />
           <Route path="transports" element={<Transports />} />
-          <Route path="transports/tcp/new" element={<TCPServerTransportForm />} />
+          <Route path="transports/new" element={<TransportTypeSelector />} />
+          <Route path="transports/new/http" element={<HTTPServerTransportForm />} />
+          <Route path="transports/new/tcp" element={<TCPServerTransportForm />} />
+          <Route path="transports/http/:name/edit" element={<HTTPServerTransportForm />} />
           <Route path="transports/tcp/:name/edit" element={<TCPServerTransportForm />} />
         </Route>
       </Routes>

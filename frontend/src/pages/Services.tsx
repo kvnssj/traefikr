@@ -15,6 +15,7 @@ import {
   Container,
   Tabs,
   TextInput,
+  Alert,
 } from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
@@ -22,7 +23,7 @@ import { resourcesApi, Resource } from '@/lib/api'
 import { ProviderIcon } from '@/components/ProviderIcon'
 import { StatusIcon } from '@/components/StatusIcon'
 import { Network as Server, Trash2, Edit, Plus, Search } from 'lucide-react'
-import { IconRouter, IconNetwork, IconWifi } from '@tabler/icons-react'
+import { IconRouter, IconNetwork, IconWifi, IconInfoCircle } from '@tabler/icons-react'
 
 export default function Services() {
   const queryClient = useQueryClient()
@@ -113,7 +114,12 @@ export default function Services() {
 
   const renderServiceCard = (protocol: string, service: Resource) => {
     const canEdit = service.source === 'database'
-    const servers = service.config?.loadBalancer?.servers || service.config?.weighted?.services || []
+
+    // Get servers from either Traefik-sourced (direct properties) or database (config property)
+    const serviceObj = service as any
+    const loadBalancer = serviceObj.loadBalancer || service.config?.loadBalancer
+    const weighted = serviceObj.weighted || service.config?.weighted
+    const servers = loadBalancer?.servers || weighted?.services || []
 
     return (
       <Card key={service.name} withBorder>
@@ -128,6 +134,22 @@ export default function Services() {
         </Card.Section>
 
         <Stack gap="md" mt="md">
+          {/* Internal service note */}
+          {service.provider === 'internal' && (
+            <Alert icon={<IconInfoCircle size={16} />} color="blue" variant="light">
+              <Text size="xs">Internal resource managed automatically by Traefik. Cannot be modified or deleted.</Text>
+            </Alert>
+          )}
+
+          {/* External provider note */}
+          {service.source !== 'database' && service.provider !== 'internal' && (
+            <Alert icon={<IconInfoCircle size={16} />} color="gray" variant="light">
+              <Text size="xs">
+                Managed by the <strong>{service.provider}</strong> provider. Modifications must be made through the provider's configuration.
+              </Text>
+            </Alert>
+          )}
+
           {/* Servers */}
           {servers.length > 0 && (
             <div>
@@ -162,7 +184,7 @@ export default function Services() {
           {/* Status and Actions */}
           <Group justify="space-between" pt="md" style={{ borderTop: '1px solid var(--mantine-color-gray-3)' }}>
             <StatusIcon
-              enabled={service.enabled}
+              enabled={service.status === 'enabled' || service.enabled}
               enabledLabel="Enabled"
               disabledLabel="Disabled"
             />

@@ -20,7 +20,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'))
   const [isLoading, setIsLoading] = useState(true)
 
+  console.log('[AUTH] AuthProvider render, token:', token ? 'exists' : 'null', 'user:', user?.username, 'isLoading:', isLoading)
+
   useEffect(() => {
+    console.log('[AUTH] useEffect triggered, token:', token ? 'exists' : 'null')
     if (token) {
       // Set the token in axios defaults
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`
@@ -28,16 +31,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Try to extract username from localStorage
       const storedUsername = localStorage.getItem('username')
       if (storedUsername) {
+        console.log('[AUTH] Setting user from localStorage:', storedUsername)
         setUser({ username: storedUsername })
       }
 
+      console.log('[AUTH] Setting isLoading to false (authenticated)')
       setIsLoading(false)
     } else {
+      console.log('[AUTH] Setting isLoading to false (no token)')
       setIsLoading(false)
     }
   }, [token])
 
   const login = async (username: string, password: string) => {
+    console.log('[AUTH] Login called for username:', username)
     const response = await authApi.login({ username, password })
 
     const { token: accessToken } = response.data
@@ -45,6 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Store token and username
     localStorage.setItem('token', accessToken)
     localStorage.setItem('username', username)
+    console.log('[AUTH] Setting token and user state')
     setToken(accessToken)
     setUser({ username })
 
@@ -53,6 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const logout = () => {
+    console.log('[AUTH] Logout called')
     localStorage.removeItem('token')
     localStorage.removeItem('username')
     setToken(null)

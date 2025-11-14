@@ -18,7 +18,7 @@ export default defineConfig({
       interval: 1000,    // Check for changes every second
     },
     hmr: {
-      host: 'localhost',
+      host: '127.0.0.1',
       port: parseInt(process.env.VITE_PORT || '3000'),
       protocol: 'ws',
     },

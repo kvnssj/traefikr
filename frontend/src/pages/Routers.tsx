@@ -157,8 +157,8 @@ export default function Routers() {
       key: 'enabled',
       label: 'Status',
       sortable: true,
-      render: (value) => (
-        <StatusIcon enabled={value} enabledLabel="Enabled" disabledLabel="Disabled" />
+      render: (value, row) => (
+        <StatusIcon enabled={row.status === 'enabled' || value} enabledLabel="Enabled" disabledLabel="Disabled" />
       ),
     },
   ]
@@ -237,8 +237,8 @@ export default function Routers() {
       key: 'enabled',
       label: 'Status',
       sortable: true,
-      render: (value) => (
-        <StatusIcon enabled={value} enabledLabel="Enabled" disabledLabel="Disabled" />
+      render: (value, row) => (
+        <StatusIcon enabled={row.status === 'enabled' || value} enabledLabel="Enabled" disabledLabel="Disabled" />
       ),
     },
   ]
@@ -280,8 +280,8 @@ export default function Routers() {
       key: 'enabled',
       label: 'Status',
       sortable: true,
-      render: (value) => (
-        <StatusIcon enabled={value} enabledLabel="Enabled" disabledLabel="Disabled" />
+      render: (value, row) => (
+        <StatusIcon enabled={row.status === 'enabled' || value} enabledLabel="Enabled" disabledLabel="Disabled" />
       ),
     },
   ]

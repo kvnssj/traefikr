@@ -1,9 +1,8 @@
-import { Container, Title, Paper, Table, Badge, Group, Text, Loader, Alert, Card, Stack, TextInput } from '@mantine/core'
-import { IconInfoCircle, IconSearch, IconDoorEnter } from '@tabler/icons-react'
+import { Container, Title, Table, Badge, Group, Text, Loader, Alert, Card, Stack, TextInput, SimpleGrid, ThemeIcon } from '@mantine/core'
+import { IconInfoCircle, IconSearch, IconDoorEnter, IconShield, IconPlugConnected, IconRocket } from '@tabler/icons-react'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { api } from '@/lib/api'
-import { StatusIcon } from '@/components/StatusIcon'
+import { entrypointsApi } from '@/lib/api'
 
 interface Entrypoint {
   name: string
@@ -40,7 +39,7 @@ export default function Entrypoints() {
   const { data: entrypoints, isLoading, error } = useQuery<Entrypoint[]>({
     queryKey: ['entrypoints'],
     queryFn: async () => {
-      const response = await api.get('/entrypoints/')
+      const response = await entrypointsApi.list()
       return response.data
     }
   })
@@ -49,6 +48,16 @@ export default function Entrypoints() {
     ep.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     ep.address?.toLowerCase().includes(searchTerm.toLowerCase())
   )
+
+  // Calculate stats
+  const stats = {
+    total: entrypoints?.length || 0,
+    http2Enabled: entrypoints?.filter(ep => ep.http2).length || 0,
+    http3Enabled: entrypoints?.filter(ep => ep.http3).length || 0,
+    avgMaxConcurrentStreams: entrypoints?.length ?
+      Math.round(entrypoints.reduce((sum, ep) => sum + (ep.http2?.maxConcurrentStreams || 0), 0) / entrypoints.length) : 0,
+    withForwardedHeaders: entrypoints?.filter(ep => ep.forwardedHeaders && Object.keys(ep.forwardedHeaders).length > 0).length || 0,
+  }
 
   if (isLoading) {
     return (
@@ -75,29 +84,23 @@ export default function Entrypoints() {
       <Table.Td>
         <Text fw={600}>{entrypoint.name}</Text>
       </Table.Td>
-      <Table.Td>{entrypoint.address || '-'}</Table.Td>
       <Table.Td>
-        <Badge color="blue">TCP</Badge>
+        <Badge variant="light">{entrypoint.address || '-'}</Badge>
       </Table.Td>
       <Table.Td>
-        <StatusIcon 
-          enabled={!!entrypoint.http?.tls} 
-          enabledLabel="TLS Enabled" 
-          disabledLabel="No TLS" 
-        />
-      </Table.Td>
-      <Table.Td>
-        {entrypoint.http?.middlewares?.length ? (
-          <Group gap="xs">
-            {entrypoint.http.middlewares.map((mw, idx) => (
-              <Badge key={`${entrypoint.name}-mw-${idx}`} variant="light">
-                {typeof mw === 'string' ? mw : JSON.stringify(mw)}
-              </Badge>
-            ))}
-          </Group>
+        {entrypoint.http2 ? (
+          <Badge color="green" variant="light">
+            HTTP/2 ({entrypoint.http2.maxConcurrentStreams} streams)
+          </Badge>
         ) : (
-          '-'
+          <Badge color="gray" variant="light">HTTP/1.1</Badge>
         )}
+      </Table.Td>
+      <Table.Td>
+        <Text size="sm">{entrypoint.transport?.respondingTimeouts?.readTimeout || '-'}</Text>
+      </Table.Td>
+      <Table.Td>
+        <Text size="sm">{entrypoint.transport?.respondingTimeouts?.idleTimeout || '-'}</Text>
       </Table.Td>
     </Table.Tr>
   ))
@@ -117,6 +120,56 @@ export default function Entrypoints() {
           </Group>
         </Group>
 
+        <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="lg">
+          <Card withBorder p="lg">
+            <Group>
+              <ThemeIcon size={60} color="blue" variant="light">
+                <IconDoorEnter size={30} />
+              </ThemeIcon>
+              <Stack gap="xs">
+                <Text size="sm" fw={500} c="dimmed">Total Entrypoints</Text>
+                <Text size="xl" fw={700}>{stats.total}</Text>
+              </Stack>
+            </Group>
+          </Card>
+
+          <Card withBorder p="lg">
+            <Group>
+              <ThemeIcon size={60} color="green" variant="light">
+                <IconRocket size={30} />
+              </ThemeIcon>
+              <Stack gap="xs">
+                <Text size="sm" fw={500} c="dimmed">HTTP/2 Enabled</Text>
+                <Text size="xl" fw={700}>{stats.http2Enabled}</Text>
+              </Stack>
+            </Group>
+          </Card>
+
+          <Card withBorder p="lg">
+            <Group>
+              <ThemeIcon size={60} color="violet" variant="light">
+                <IconPlugConnected size={30} />
+              </ThemeIcon>
+              <Stack gap="xs">
+                <Text size="sm" fw={500} c="dimmed">Avg Concurrent Streams</Text>
+                <Text size="xl" fw={700}>{stats.avgMaxConcurrentStreams}</Text>
+              </Stack>
+            </Group>
+          </Card>
+
+          <Card withBorder p="lg">
+            <Group>
+              <ThemeIcon size={60} color="orange" variant="light">
+                <IconShield size={30} />
+              </ThemeIcon>
+              <Stack gap="xs">
+                <Text size="sm" fw={500} c="dimmed">Forwarded Headers</Text>
+                <Text size="xl" fw={700}>{stats.withForwardedHeaders}</Text>
+              </Stack>
+            </Group>
+          </Card>
+        </SimpleGrid>
+
         <Card shadow="sm" radius="md" withBorder>
           <Stack>
             <TextInput
@@ -131,9 +184,9 @@ export default function Entrypoints() {
                 <Table.Tr>
                   <Table.Th>Name</Table.Th>
                   <Table.Th>Address</Table.Th>
-                  <Table.Th>Transport</Table.Th>
-                  <Table.Th>TLS</Table.Th>
-                  <Table.Th>Middlewares</Table.Th>
+                  <Table.Th>Protocol</Table.Th>
+                  <Table.Th>Read Timeout</Table.Th>
+                  <Table.Th>Idle Timeout</Table.Th>
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>

@@ -58,18 +58,18 @@ func (h *ConfigHandler) GetConfig(c *gin.Context) {
 	// Build Traefik configuration structure
 	result := &TraefikProviderConfig{
 		HTTP: &HTTPProtocol{
-			Routers:          make(map[string]interface{}),
-			Services:         make(map[string]interface{}),
-			Middlewares:      make(map[string]interface{}),
-			ServersTransport: make(map[string]interface{}),
-			TLS:              make(map[string]interface{}),
+			Routers:     make(map[string]interface{}),
+			Services:    make(map[string]interface{}),
+			Middlewares: make(map[string]interface{}),
+			//ServersTransport: make(map[string]interface{}),
+			//TLS: make(map[string]interface{}),
 		},
 		TCP: &TCPProtocol{
-			Routers:          make(map[string]interface{}),
-			Services:         make(map[string]interface{}),
-			Middlewares:      make(map[string]interface{}),
-			ServersTransport: make(map[string]interface{}),
-			TLS:              make(map[string]interface{}),
+			Routers:     make(map[string]interface{}),
+			Services:    make(map[string]interface{}),
+			Middlewares: make(map[string]interface{}),
+			//ServersTransport: make(map[string]interface{}),
+			//TLS: make(map[string]interface{}),
 		},
 		UDP: &UDPProtocol{
 			Routers:     make(map[string]interface{}),
@@ -92,10 +92,10 @@ func (h *ConfigHandler) GetConfig(c *gin.Context) {
 				result.HTTP.Services[key] = config.Config
 			case "middlewares":
 				result.HTTP.Middlewares[key] = config.Config
-			case "serversTransport":
-				result.HTTP.ServersTransport[key] = config.Config
-			case "tls":
-				result.HTTP.TLS[key] = config.Config
+				//case "serversTransport":
+				//	result.HTTP.ServersTransport[key] = config.Config
+				//case "tls":
+				//	result.HTTP.TLS[key] = config.Config
 			}
 		case "tcp":
 			switch config.Type {
@@ -105,10 +105,10 @@ func (h *ConfigHandler) GetConfig(c *gin.Context) {
 				result.TCP.Services[key] = config.Config
 			case "middlewares":
 				result.TCP.Middlewares[key] = config.Config
-			case "serversTransport":
-				result.TCP.ServersTransport[key] = config.Config
-			case "tls":
-				result.TCP.TLS[key] = config.Config
+				//case "serversTransport":
+				//	result.TCP.ServersTransport[key] = config.Config
+				//case "tls":
+				//	result.TCP.TLS[key] = config.Config
 			}
 		case "udp":
 			switch config.Type {
@@ -124,13 +124,13 @@ func (h *ConfigHandler) GetConfig(c *gin.Context) {
 
 	// Clean up empty protocol sections by setting them to nil
 	if len(result.HTTP.Routers) == 0 && len(result.HTTP.Services) == 0 &&
-		len(result.HTTP.Middlewares) == 0 && len(result.HTTP.ServersTransport) == 0 &&
-		len(result.HTTP.TLS) == 0 {
+		len(result.HTTP.Middlewares) == 0 { /*&& len(result.HTTP.ServersTransport) == 0 &&
+		len(result.HTTP.TLS) == 0 {*/
 		result.HTTP = nil
 	}
 	if len(result.TCP.Routers) == 0 && len(result.TCP.Services) == 0 &&
-		len(result.TCP.Middlewares) == 0 && len(result.TCP.ServersTransport) == 0 &&
-		len(result.TCP.TLS) == 0 {
+		len(result.TCP.Middlewares) == 0 { /* && len(result.TCP.ServersTransport) == 0 &&
+		len(result.TCP.TLS) == 0 {*/
 		result.TCP = nil
 	}
 	if len(result.UDP.Routers) == 0 && len(result.UDP.Services) == 0 &&

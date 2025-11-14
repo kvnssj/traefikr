@@ -18,7 +18,7 @@ import { IconPlugConnected, IconDeviceFloppy, IconArrowLeft } from '@tabler/icon
 import { resourcesApi } from '@/lib/api'
 import { SchemaForm } from '@/components/SchemaForm'
 
-export default function TCPServerTransportForm() {
+export default function HTTPServerTransportForm() {
   const navigate = useNavigate()
   const { name } = useParams<{ name: string }>()
   const queryClient = useQueryClient()
@@ -33,10 +33,10 @@ export default function TCPServerTransportForm() {
 
   // Fetch existing transport in edit mode
   const { data: existingTransport, isLoading: isLoadingTransport } = useQuery({
-    queryKey: ['resources', 'tcp', 'serversTransport', name],
+    queryKey: ['resources', 'http', 'serversTransport', name],
     queryFn: async () => {
       if (!name) return null
-      const response = await resourcesApi.get('tcp', 'serversTransport', name)
+      const response = await resourcesApi.get('http', 'serversTransport', name)
       return response.data
     },
     enabled: isEditMode,
@@ -57,13 +57,13 @@ export default function TCPServerTransportForm() {
   // Create mutation
   const createMutation = useMutation({
     mutationFn: async () => {
-      const response = await resourcesApi.create('tcp', 'serversTransport', formData)
+      const response = await resourcesApi.create('http', 'serversTransport', formData)
       return response.data
     },
     onSuccess: () => {
       notifications.show({
         title: 'Success',
-        message: 'TCP server transport created successfully',
+        message: 'HTTP server transport created successfully',
         color: 'green',
       })
       queryClient.invalidateQueries({ queryKey: ['tcp-server-transports'] })
@@ -82,7 +82,7 @@ export default function TCPServerTransportForm() {
   const updateMutation = useMutation({
     mutationFn: async () => {
       if (!name) throw new Error('No transport name provided')
-      const response = await resourcesApi.update('tcp', 'serversTransport', name, {
+      const response = await resourcesApi.update('http', 'serversTransport', name, {
         enabled: formData.enabled,
         config: formData.config,
       })
@@ -91,7 +91,7 @@ export default function TCPServerTransportForm() {
     onSuccess: () => {
       notifications.show({
         title: 'Success',
-        message: 'TCP server transport updated successfully',
+        message: 'HTTP server transport updated successfully',
         color: 'green',
       })
       queryClient.invalidateQueries({ queryKey: ['tcp-server-transports'] })
@@ -147,9 +147,9 @@ export default function TCPServerTransportForm() {
           <Group>
             <IconPlugConnected size={32} stroke={1.5} color="#00aec1" />
             <div>
-              <Title order={2}>{isEditMode ? 'Edit' : 'Create'} TCP ServersTransport</Title>
+              <Title order={2}>{isEditMode ? 'Edit' : 'Create'} HTTP ServersTransport</Title>
               <Text c="dimmed" size="sm">
-                {isEditMode ? `Update transport: ${formData.name}` : 'Create a new TCP server transport'}
+                {isEditMode ? `Update transport: ${formData.name}` : 'Create a new HTTP server transport'}
               </Text>
             </div>
           </Group>
@@ -169,7 +169,7 @@ export default function TCPServerTransportForm() {
               <Stack gap="md">
                 <TextInput
                   label="Transport Name"
-                  placeholder="my-tcp-transport"
+                  placeholder="my-http-transport"
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.currentTarget.value })}
@@ -196,7 +196,7 @@ export default function TCPServerTransportForm() {
             {/* Configuration Card */}
             <Card shadow="sm" radius="md" withBorder>
               <SchemaForm
-                protocol="tcp"
+                protocol="http"
                 type="serversTransport"
                 value={formData.config}
                 onChange={(newConfig) => setFormData({ ...formData, config: newConfig })}
