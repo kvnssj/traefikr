@@ -45,104 +45,116 @@
       "description": "Activates health monitoring for child services. All child services must have HealthCheck enabled if parent enables it."
     }
   },
-  "type": "object",
-  "properties": {
-    "loadBalancer": {
-      "title": "Load Balancer",
+  "oneOf": [
+    {
       "type": "object",
       "properties": {
-        "servers": {
-          "title": "Servers",
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "address": {
-                "title": "Address",
-                "type": "string",
-                "description": "IP:Port pointing to a specific backend instance"
-              },
-              "tls": {
-                "title": "TLS",
-                "type": "boolean",
-                "default": false,
-                "description": "Enable TLS when dialing with the backend"
-              }
-            },
-            "required": ["address"],
-            "additionalProperties": false
-          },
-          "minItems": 1,
-          "description": "Declares instances of your backend program"
-        },
-        "serversTransport": {
-          "title": "Servers Transport",
-          "type": "string",
-          "description": "Reference to a TCP ServersTransport configuration for the communication between Traefik and your servers"
-        },
-        "healthCheck": {
-          "$ref": "#/$defs/loadBalancerHealthCheck"
-        },
-        "proxyProtocol": {
-          "title": "Proxy Protocol",
+        "loadBalancer": {
+          "title": "Load Balancer",
           "type": "object",
           "properties": {
-            "version": {
-              "title": "Version",
+            "servers": {
+              "title": "Servers",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "address": {
+                    "title": "Address",
+                    "type": "string",
+                    "description": "IP:Port pointing to a specific backend instance"
+                  },
+                  "tls": {
+                    "title": "TLS",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Enable TLS when dialing with the backend"
+                  }
+                },
+                "required": ["address"],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "description": "Declares instances of your backend program"
+            },
+            "serversTransport": {
+              "title": "Servers Transport",
+              "type": "string",
+              "description": "Reference to a TCP ServersTransport configuration for the communication between Traefik and your servers"
+            },
+            "healthCheck": {
+              "$ref": "#/$defs/loadBalancerHealthCheck"
+            },
+            "proxyProtocol": {
+              "title": "Proxy Protocol",
+              "type": "object",
+              "properties": {
+                "version": {
+                  "title": "Version",
+                  "type": "integer",
+                  "enum": [1, 2],
+                  "description": "PROXY protocol version to use (1 or 2)"
+                }
+              },
+              "additionalProperties": false,
+              "description": "Configures the PROXY protocol to pass client connection information to the backend"
+            },
+            "terminationDelay": {
+              "title": "Termination Delay",
               "type": "integer",
-              "enum": [1, 2],
-              "description": "PROXY protocol version to use (1 or 2)"
+              "description": "Duration in milliseconds to wait before fully terminating the connection"
             }
           },
+          "required": ["servers"],
           "additionalProperties": false,
-          "description": "Configures the PROXY protocol to pass client connection information to the backend"
-        },
-        "terminationDelay": {
-          "title": "Termination Delay",
-          "type": "integer",
-          "description": "Duration in milliseconds to wait before fully terminating the connection"
+          "description": "Load balances TCP connections between multiple backend servers"
         }
       },
-      "required": ["servers"],
-      "additionalProperties": false,
-      "description": "Load balances TCP connections between multiple backend servers"
+      "required": ["loadBalancer"],
+      "additionalProperties": false
     },
-    "weighted": {
-      "title": "Weighted Round Robin",
+    {
       "type": "object",
       "properties": {
-        "services": {
-          "title": "Services",
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "name": {
-                "title": "Name",
-                "type": "string",
-                "description": "The referenced service identifier"
+        "weighted": {
+          "title": "Weighted Round Robin",
+          "type": "object",
+          "properties": {
+            "services": {
+              "title": "Services",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "title": "Name",
+                    "type": "string",
+                    "description": "The referenced service identifier"
+                  },
+                  "weight": {
+                    "title": "Weight",
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Numeric value determining traffic distribution ratio"
+                  }
+                },
+                "required": ["name", "weight"],
+                "additionalProperties": false
               },
-              "weight": {
-                "title": "Weight",
-                "type": "integer",
-                "minimum": 0,
-                "description": "Numeric value determining traffic distribution ratio"
-              }
+              "minItems": 1,
+              "description": "Array of child services with their traffic distribution weights"
             },
-            "required": ["name", "weight"],
-            "additionalProperties": false
+            "healthCheck": {
+              "$ref": "#/$defs/weightedHealthCheck"
+            }
           },
-          "minItems": 1,
-          "description": "Array of child services with their traffic distribution weights"
-        },
-        "healthCheck": {
-          "$ref": "#/$defs/weightedHealthCheck"
+          "required": ["services"],
+          "additionalProperties": false,
+          "description": "Weighted round robin service for load balancing TCP connections between multiple services based on provided weights"
         }
       },
-      "required": ["services"],
-      "additionalProperties": false,
-      "description": "Weighted round robin service for load balancing TCP connections between multiple services based on provided weights"
+      "required": ["weighted"],
+      "additionalProperties": false
     }
-  },
-  "additionalProperties": false
+  ]
 }

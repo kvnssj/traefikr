@@ -1,0 +1,158 @@
+/* Global styles for Traefik Manager */
+
+/* Make containers use full width with minimal padding */
+.mantine-Container-root {
+  max-width: 100% !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+}
+
+@media (min-width: 48em) {
+  .mantine-Container-root {
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+  }
+}
+
+/* AppShell specific styles */
+.mantine-AppShell-header {
+  background: linear-gradient(135deg, #1a1c2e 0%, #2f3449 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: white;
+}
+
+.mantine-AppShell-navbar {
+  background: #1a1c2e;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.mantine-AppShell-main {
+  background: #f8f9fa;
+}
+
+/* NavLink styles - white text in dark sidebar */
+.mantine-NavLink-root {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.mantine-NavLink-label {
+  color: inherit !important;
+}
+
+.mantine-NavLink-root:hover {
+  background-color: rgba(0, 174, 193, 0.1) !important;
+  color: white !important;
+}
+
+.mantine-NavLink-root[data-active] {
+  background-color: rgba(0, 174, 193, 0.15) !important;
+  color: #4dd2de !important;
+  border-left: 3px solid #00aec1;
+}
+
+/* Card styling - white cards in body */
+.mantine-Card-root {
+  background: white;
+  border-color: #e0e0e0;
+}
+
+/* Text should be black in body */
+.mantine-AppShell-main .mantine-Text-root,
+.mantine-AppShell-main .mantine-Title-root {
+  color: #1a1a1a;
+}
+
+/* Table styling */
+.mantine-Table-root {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Table header with gray background */
+.mantine-Table-thead {
+  background: #f5f5f5;
+}
+
+.mantine-Table-thead th {
+  background: #f5f5f5;
+  border-bottom: 2px solid #e0e0e0;
+  font-weight: 600;
+  color: #2c3e50;
+  padding: 12px 16px;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+/* Table body with white background */
+.mantine-Table-tbody {
+  background: white;
+}
+
+.mantine-Table-tbody td {
+  background: white;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 12px 16px;
+  color: #1a1a1a;
+}
+
+/* Remove bottom border from last row */
+.mantine-Table-tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Striped rows in body */
+.mantine-Table-tbody tr:nth-of-type(even) td {
+  background: #fafafa;
+}
+
+/* Hover effect with Traefik blue */
+.mantine-Table-tbody tr:hover td {
+  background: rgba(0, 174, 193, 0.04) !important;
+  cursor: pointer;
+}
+
+/* Button primary color */
+.mantine-Button-root[data-variant="filled"] {
+  background: linear-gradient(135deg, #00aec1 0%, #00d4e6 100%);
+  border: none;
+}
+
+.mantine-Button-root[data-variant="filled"]:hover {
+  background: linear-gradient(135deg, #009db0 0%, #00c5d5 100%);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f0f0f0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c0c0c0;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a0a0a0;
+}
+
+/* Fix sidebar text visibility */
+.mantine-AppShell-navbar .mantine-Text-root {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Menu dropdown should have readable text */
+.mantine-Menu-dropdown {
+  background: white;
+}
+
+.mantine-Menu-item {
+  color: #1a1a1a;
+}
