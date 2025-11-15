@@ -116,10 +116,23 @@ Keep your account secure by changing your password anytime from the user menu.
 
 Get Traefikr running in just a few steps:
 
+**Option 1: Using Pre-built Image (Recommended)**
+
+```bash
+# Pull the latest image
+docker pull ghcr.io/allfro/traefikr:latest
+
+# Run with docker-compose (uses pre-built image)
+docker-compose up -d
+```
+
+**Option 2: Build from Source**
+
 1. **Clone and start**:
    ```bash
-   git clone https://github.com/yourusername/traefikr.git
+   git clone https://github.com/allfro/traefikr.git
    cd traefikr
+   docker-compose build
    docker-compose up -d
    ```
 
@@ -330,6 +343,31 @@ docker-compose build
 
 See [CLAUDE.md](CLAUDE.md) for detailed technical documentation.
 
+## Container Registry
+
+Pre-built Docker images are automatically published to GitHub Container Registry on every push to `main` and on version tags.
+
+### Available Images
+
+```bash
+# Latest stable version (main branch)
+ghcr.io/allfro/traefikr:latest
+
+# Specific version tag
+ghcr.io/allfro/traefikr:v1.0.0
+ghcr.io/allfro/traefikr:v1.0
+ghcr.io/allfro/traefikr:v1
+
+# Commit-based tag (for testing specific commits)
+ghcr.io/allfro/traefikr:main-abc1234
+```
+
+### Multi-Architecture Support
+
+Images are built for multiple platforms:
+- `linux/amd64` (x86_64)
+- `linux/arm64` (ARM 64-bit, e.g., Raspberry Pi 4, Apple Silicon)
+
 ## Roadmap
 
 We're constantly improving Traefikr. Here's what's coming:
@@ -347,8 +385,8 @@ We're constantly improving Traefikr. Here's what's coming:
 Having trouble? We're here to help!
 
 - **Documentation**: Check [CLAUDE.md](CLAUDE.md) for technical details
-- **Issues**: Report bugs on [GitHub Issues](https://github.com/yourusername/traefikr/issues)
-- **Discussions**: Ask questions in [GitHub Discussions](https://github.com/yourusername/traefikr/discussions)
+- **Issues**: Report bugs on [GitHub Issues](https://github.com/allfro/traefikr/issues)
+- **Discussions**: Ask questions in [GitHub Discussions](https://github.com/allfro/traefikr/discussions)
 
 ## Contributing
 

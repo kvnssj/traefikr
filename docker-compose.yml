@@ -25,9 +25,14 @@ services:
       - backend
 
   backend:
+    # Option 1: Use pre-built image from GitHub Container Registry (recommended for production)
+    # image: ghcr.io/allfro/traefikr:latest
+
+    # Option 2: Build from source (for development)
     build:
       context: .
       dockerfile: Dockerfile
+
     environment:
       - TRAEFIKR_DB_PATH=/data/traefikr.db
       - TRAEFIK_API_URL=http://traefik:8080
