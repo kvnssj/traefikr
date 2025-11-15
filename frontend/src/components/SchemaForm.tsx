@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import {
   Tabs,
   TextInput,
@@ -793,7 +793,7 @@ export function SchemaForm({
                     protocol={protocol}
                     type="routers"
                     value={item || null}
-                    onChange={(newValue) => handleItemChange(index, newValue)}
+                    onChange={(newValue) => handleItemChange(index, newValue || '')}
                     placeholder="Select parent router"
                     disabled={disabled}
                   />

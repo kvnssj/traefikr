@@ -10,12 +10,12 @@ import (
 	"gorm.io/gorm"
 )
 
-// AuthMiddleware checks for valid API key in x-auth-key header
+// AuthMiddleware checks for valid API key in x-traefikr-key header
 func AuthMiddleware(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		apiKey := c.GetHeader("x-auth-key")
+		apiKey := c.GetHeader("x-traefikr-key")
 		if apiKey == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing x-auth-key header"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing x-traefikr-key header"})
 			c.Abort()
 			return
 		}

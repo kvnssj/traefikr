@@ -40,7 +40,7 @@ CGO_ENABLED=1 GOOS=linux go build \
     -o main .
 
 # Run locally
-DB_PATH=./traefikr.db PORT=8080 TRAEFIK_API_URL=http://localhost:8080 ./traefikr
+TRAEFIKR_DB_PATH=./traefikr.db TRAEFIKR_PORT=8080 TRAEFIK_API_URL=http://localhost:8080 ./traefikr
 ```
 
 ### Testing
@@ -75,11 +75,11 @@ Traefikr implements **two separate authentication mechanisms** - this is critica
    - **ONLY** used for `/api/config` endpoint (Traefik HTTP provider polling)
    - API keys are standalone, not linked to users
    - Created via `/api/http/provider` endpoint (requires JWT)
-   - Passed as `x-auth-key` header
+   - Passed as `x-traefikr-key` header
    - Implements conditional authentication: public if no API keys exist (bootstrap mode), requires auth once keys are created
    - Implemented in `middleware/auth.go`
 
-**IMPORTANT**: These two authentication systems must remain separate. Do not mix them or allow x-auth-key to be used for CRUD operations.
+**IMPORTANT**: These two authentication systems must remain separate. Do not mix them or allow x-traefikr-key to be used for CRUD operations.
 
 ### Route Structure
 
@@ -189,8 +189,8 @@ The backend runs in a **FROM scratch** container with:
 
 Backend (`docker-compose.yml` or local execution):
 ```bash
-DB_PATH=/data/traefikr.db           # Database location
-PORT=8080                            # Server port
+TRAEFIKR_DB_PATH=/data/traefikr.db           # Database location
+TRAEFIKR_PORT=8080                            # Server port
 TRAEFIK_API_URL=http://traefik:8080  # Traefik API endpoint
 JWT_SECRET=<random>                  # JWT signing key (auto-generated if not set)
 ```

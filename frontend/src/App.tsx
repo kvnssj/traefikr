@@ -16,7 +16,7 @@ import Middlewares from '@/pages/Middlewares'
 import MiddlewareProtocolSelector from '@/pages/MiddlewareProtocolSelector'
 import MiddlewareTypeSelector from '@/pages/MiddlewareTypeSelector'
 import HTTPMiddlewareForm from '@/pages/HTTPMiddlewareForm'
-import Providers from '@/pages/Providers'
+import Settings from '@/pages/Settings'
 import Entrypoints from '@/pages/Entrypoints'
 import TLS from '@/pages/TLS'
 import TLSCertificateForm from '@/pages/TLSCertificateForm'
@@ -25,7 +25,6 @@ import Transports from '@/pages/Transports'
 import TransportTypeSelector from '@/pages/TransportTypeSelector'
 import HTTPServerTransportForm from '@/pages/HTTPServerTransportForm'
 import TCPServerTransportForm from '@/pages/TCPServerTransportForm'
-import HTTPProviderConfig from '@/pages/HTTPProviderConfig'
 import Login from '@/pages/Login'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
@@ -68,8 +67,7 @@ function App() {
           <Route path="middlewares/new/:protocol" element={<MiddlewareTypeSelector />} />
           <Route path="middlewares/new/:protocol/:middlewareType" element={<HTTPMiddlewareForm />} />
           <Route path="middlewares/:protocol/:name/edit" element={<HTTPMiddlewareForm />} />
-          <Route path="providers" element={<Providers />} />
-          <Route path="providers/http/configure" element={<HTTPProviderConfig />} />
+          <Route path="settings" element={<Settings />} />
           <Route path="entrypoints" element={<Entrypoints />} />
           <Route path="tls" element={<TLS />} />
           <Route path="tls/certificates/new" element={<TLSCertificateForm />} />

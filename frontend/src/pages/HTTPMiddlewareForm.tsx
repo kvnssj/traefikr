@@ -29,7 +29,7 @@ export default function HTTPMiddlewareForm() {
 
   const [formData, setFormData] = useState({
     name: '',
-    provider: protocol,
+    provider: 'http',
     type: type,
     config: {},
   })

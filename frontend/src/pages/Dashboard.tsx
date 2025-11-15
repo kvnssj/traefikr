@@ -1,19 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
-import { Card, Badge, Title, Text, Group, Stack, SimpleGrid, ThemeIcon, Container } from '@mantine/core'
-import { providersApi, resourcesApi } from '@/lib/api'
-import { Network, Server, Shield, Layers, AlertCircle, CheckCircle } from 'lucide-react'
+import { Card, Title, Text, Group, Stack, SimpleGrid, ThemeIcon, Container } from '@mantine/core'
+import { resourcesApi } from '@/lib/api'
+import { Network, Server, Shield } from 'lucide-react'
 
 export default function Dashboard() {
   console.log('[DASHBOARD] Render')
-
-  const { data: providers } = useQuery({
-    queryKey: ['providers'],
-    queryFn: async () => {
-      console.log('[DASHBOARD] Fetching providers')
-      const response = await providersApi.list()
-      return response.data
-    }
-  })
 
   // Fetch HTTP routers
   const { data: httpRouters = [] } = useQuery({
@@ -111,12 +102,6 @@ export default function Dashboard() {
       icon: Shield,
       color: 'violet',
     },
-    {
-      name: 'Providers',
-      value: providers?.filter(p => p.enabled)?.length || 0,
-      icon: Layers,
-      color: 'orange',
-    },
   ]
 
   return (
@@ -146,43 +131,7 @@ export default function Dashboard() {
         })}
       </SimpleGrid>
 
-      <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
-        <Card withBorder>
-          <Card.Section withBorder inheritPadding py="md">
-            <Title order={3}>Provider Status</Title>
-          </Card.Section>
-          <Card.Section inheritPadding py="md">
-            <Stack gap="md">
-              {providers?.map((provider) => (
-                <Group key={provider.type} justify="space-between">
-                  <Group>
-                    <Layers size={20} color="gray" />
-                    <Stack gap="xs">
-                      <Text fw={500} style={{ textTransform: 'capitalize' }}>
-                        {provider.type.replace('_', ' ')}
-                      </Text>
-                      {provider.message && (
-                        <Text size="sm" c="dimmed">{provider.message}</Text>
-                      )}
-                    </Stack>
-                  </Group>
-                  <Group gap="xs">
-                    {provider.status === 'healthy' ? (
-                      <CheckCircle size={20} color="green" />
-                    ) : (
-                      <AlertCircle size={20} color="red" />
-                    )}
-                    <Badge variant="light" color={provider.status === 'healthy' ? 'green' : 'red'}>
-                      {provider.status}
-                    </Badge>
-                  </Group>
-                </Group>
-              ))}
-            </Stack>
-          </Card.Section>
-        </Card>
-
-        <Card withBorder>
+      <Card withBorder>
           <Card.Section withBorder inheritPadding py="md">
             <Title order={3}>Recent Activity</Title>
           </Card.Section>
@@ -207,7 +156,6 @@ export default function Dashboard() {
             </Stack>
           </Card.Section>
         </Card>
-      </SimpleGrid>
       </Stack>
     </Container>
   )

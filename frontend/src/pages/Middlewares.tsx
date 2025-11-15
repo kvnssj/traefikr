@@ -140,7 +140,7 @@ export default function Middlewares() {
       ),
       labels: { confirm: 'Delete', cancel: 'Cancel' },
       confirmProps: { color: 'red' },
-      onConfirm: () => deleteMutation.mutate({ protocol, name: middleware.name }),
+      onConfirm: () => deleteMutation.mutate({ protocol, name: `${middleware.name}@${middleware.provider}` }),
     })
   }
 

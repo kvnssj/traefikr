@@ -5,7 +5,7 @@ BASE_URL="http://localhost:8000/api"
 
 # HTTP Routers
 curl -X POST "$BASE_URL/http/routers" \
-  -H "x-auth-key: $API_KEY" \
+  -H "x-traefikr-key: $API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Router0",
@@ -35,7 +35,7 @@ curl -X POST "$BASE_URL/http/routers" \
   }'
 
 curl -X POST "$BASE_URL/http/routers" \
-  -H "x-auth-key: $API_KEY" \
+  -H "x-traefikr-key: $API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Router1",
@@ -66,7 +66,7 @@ curl -X POST "$BASE_URL/http/routers" \
 
 # HTTP Services
 curl -X POST "$BASE_URL/http/services" \
-  -H "x-auth-key: $API_KEY" \
+  -H "x-traefikr-key: $API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Service01",
@@ -80,7 +80,7 @@ curl -X POST "$BASE_URL/http/services" \
   }'
 
 curl -X POST "$BASE_URL/http/services" \
-  -H "x-auth-key: $API_KEY" \
+  -H "x-traefikr-key: $API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Service02",
@@ -96,7 +96,7 @@ curl -X POST "$BASE_URL/http/services" \
   }'
 
 curl -X POST "$BASE_URL/http/services" \
-  -H "x-auth-key: $API_KEY" \
+  -H "x-traefikr-key: $API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Service03",
@@ -144,7 +144,7 @@ curl -X POST "$BASE_URL/http/services" \
   }'
 
 curl -X POST "$BASE_URL/http/services" \
-  -H "x-auth-key: $API_KEY" \
+  -H "x-traefikr-key: $API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Service04",
@@ -163,7 +163,7 @@ curl -X POST "$BASE_URL/http/services" \
   }'
 
 curl -X POST "$BASE_URL/http/services" \
-  -H "x-auth-key: $API_KEY" \
+  -H "x-traefikr-key: $API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Service05",
@@ -191,7 +191,7 @@ curl -X POST "$BASE_URL/http/services" \
 
 # HTTP Middlewares (I'll create a few key ones, all 25 would be very long)
 curl -X POST "$BASE_URL/http/middlewares" \
-  -H "x-auth-key: $API_KEY" \
+  -H "x-traefikr-key: $API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Middleware01",
@@ -199,7 +199,7 @@ curl -X POST "$BASE_URL/http/middlewares" \
   }'
 
 curl -X POST "$BASE_URL/http/middlewares" \
-  -H "x-auth-key: $API_KEY" \
+  -H "x-traefikr-key: $API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Middleware02",
@@ -215,7 +215,7 @@ curl -X POST "$BASE_URL/http/middlewares" \
   }'
 
 curl -X POST "$BASE_URL/http/middlewares" \
-  -H "x-auth-key: $API_KEY" \
+  -H "x-traefikr-key: $API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Middleware03",
@@ -232,7 +232,7 @@ curl -X POST "$BASE_URL/http/middlewares" \
 
 # HTTP ServersTransports
 curl -X POST "$BASE_URL/http/serversTransport" \
-  -H "x-auth-key: $API_KEY" \
+  -H "x-traefikr-key: $API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "ServersTransport0",
@@ -263,7 +263,7 @@ curl -X POST "$BASE_URL/http/serversTransport" \
 
 # TCP Routers
 curl -X POST "$BASE_URL/tcp/routers" \
-  -H "x-auth-key: $API_KEY" \
+  -H "x-traefikr-key: $API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "TCPRouter0",
@@ -288,7 +288,7 @@ curl -X POST "$BASE_URL/tcp/routers" \
 
 # TCP Services
 curl -X POST "$BASE_URL/tcp/services" \
-  -H "x-auth-key: $API_KEY" \
+  -H "x-traefikr-key: $API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "TCPService01",
@@ -315,7 +315,7 @@ curl -X POST "$BASE_URL/tcp/services" \
 
 # TCP Middlewares
 curl -X POST "$BASE_URL/tcp/middlewares" \
-  -H "x-auth-key: $API_KEY" \
+  -H "x-traefikr-key: $API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "TCPMiddleware01",
@@ -328,7 +328,7 @@ curl -X POST "$BASE_URL/tcp/middlewares" \
 
 # UDP Routers
 curl -X POST "$BASE_URL/udp/routers" \
-  -H "x-auth-key: $API_KEY" \
+  -H "x-traefikr-key: $API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "UDPRouter0",
@@ -340,7 +340,7 @@ curl -X POST "$BASE_URL/udp/routers" \
 
 # UDP Services
 curl -X POST "$BASE_URL/udp/services" \
-  -H "x-auth-key: $API_KEY" \
+  -H "x-traefikr-key: $API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "UDPService01",

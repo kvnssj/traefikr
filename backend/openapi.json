@@ -30,7 +30,7 @@
       "ApiKeyAuth": {
         "type": "apiKey",
         "in": "header",
-        "name": "x-auth-key",
+        "name": "x-traefikr-key",
         "description": "API key for Traefik polling (only used for /api/config endpoint)"
       }
     },
@@ -435,7 +435,7 @@
     "/api/config": {
       "get": {
         "summary": "Get Traefik Configuration",
-        "description": "Returns the complete Traefik configuration in HTTP provider format for Traefik to poll. Requires x-auth-key header if API keys exist in the database. Public (no auth) if no API keys exist (bootstrap mode).",
+        "description": "Returns the complete Traefik configuration in HTTP provider format for Traefik to poll. Requires x-traefikr-key header if API keys exist in the database. Public (no auth) if no API keys exist (bootstrap mode).",
         "operationId": "getConfig",
         "tags": ["Configuration"],
         "security": [

@@ -10,7 +10,7 @@ import (
 type DB = gorm.DB
 
 func InitDB() (*DB, error) {
-	dbPath := os.Getenv("DB_PATH")
+	dbPath := os.Getenv("TRAEFIKR_DB_PATH")
 	if dbPath == "" {
 		dbPath = "./traefikr.db"
 	}

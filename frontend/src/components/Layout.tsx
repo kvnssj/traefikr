@@ -33,7 +33,7 @@ export default function Layout() {
     { path: '/entrypoints', label: 'Entrypoints', icon: IconNetwork },
     { path: '/transports', label: 'Servers Transport', icon: IconPlugConnected },
     // { path: '/tls', label: 'TLS', icon: IconLock },
-    { path: '/providers', label: 'Settings', icon: IconCloud },
+    { path: '/settings', label: 'Settings', icon: IconCloud },
   ]
 
   return (
@@ -110,12 +110,14 @@ export default function Layout() {
                 to={item.path}
                 label={item.label}
                 leftSection={<Icon size={20} stroke={1.5} />}
-                style={({ isActive }) => ({
-                  backgroundColor: isActive ? 'rgba(0, 174, 193, 0.15)' : undefined,
-                  borderRadius: 'var(--mantine-radius-sm)',
-                  borderLeft: isActive ? '3px solid #00aec1' : '3px solid transparent',
-                  color: isActive ? '#4dd2de' : 'rgba(255, 255, 255, 0.8)',
-                  marginBottom: 4
+                styles={(theme, params) => ({
+                  root: {
+                    backgroundColor: params.active ? 'rgba(0, 174, 193, 0.15)' : undefined,
+                    borderRadius: 'var(--mantine-radius-sm)',
+                    borderLeft: params.active ? '3px solid #00aec1' : '3px solid transparent',
+                    color: params.active ? '#4dd2de' : 'rgba(255, 255, 255, 0.8)',
+                    marginBottom: 4
+                  }
                 })}
                 mb={4}
               />

@@ -18,15 +18,15 @@ API_KEY=$(echo "$API_KEY_RESPONSE" | jq -r '.key')
 
 echo ""
 echo "=== Test 3: Test /api/config with API key (should work) ==="
-curl -s -H "x-auth-key: $API_KEY" http://localhost:8000/api/config | jq
+curl -s -H "x-traefikr-key: $API_KEY" http://localhost:8000/api/config | jq
 
 echo ""
 echo "=== Test 4: Test /api/config without API key (should fail - API keys exist) ==="
 curl -s -w "\nHTTP %{http_code}\n" http://localhost:8000/api/config | head -3
 
 echo ""
-echo "=== Test 5: Try CRUD with x-auth-key (should fail - needs JWT) ==="
-curl -s -H "x-auth-key: $API_KEY" http://localhost:8000/api/http/routers | jq -r '.error // "SUCCESS"'
+echo "=== Test 5: Try CRUD with x-traefikr-key (should fail - needs JWT) ==="
+curl -s -H "x-traefikr-key: $API_KEY" http://localhost:8000/api/http/routers | jq -r '.error // "SUCCESS"'
 
 echo ""
 echo "=== Test 6: Try CRUD with JWT (should work) ==="

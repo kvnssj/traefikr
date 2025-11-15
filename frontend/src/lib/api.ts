@@ -1,7 +1,8 @@
 import axios from 'axios'
 
-// Use the API URL from environment variable or default to localhost:8000
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+// Use the API URL from environment variable or default to same origin (for unified container)
+// In development with separate containers, set VITE_TRAEFIKR_API_URL=http://localhost:8000
+const API_BASE_URL = import.meta.env.VITE_TRAEFIKR_API_URL || ''
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -36,6 +37,7 @@ export interface Resource {
   enabled: boolean
   config: Record<string, any>
   source?: 'database' | 'traefik' // Added by backend when ?traefik=true
+  status?: string // Status from Traefik (enabled, disabled, warning, error)
 }
 
 export interface CreateResourceRequest {
@@ -56,15 +58,26 @@ export interface Entrypoint {
   [key: string]: any
 }
 
-export interface APIKey {
+export interface APIKeyListItem {
   id: number
   name: string
-  key: string // Full key only shown on creation, masked afterwards
+  key_preview: string // Masked key (first 8 chars + "...")
   created_at: string
+  comment?: string
+  is_active: boolean
+  last_used_at?: string
+}
+
+export interface APIKeyCreatedResponse {
+  id: number
+  name: string
+  key: string // Full key only shown once on creation
+  comment?: string
 }
 
 export interface CreateAPIKeyRequest {
   name: string
+  comment?: string
 }
 
 export interface LoginRequest {
@@ -120,12 +133,12 @@ export const entrypointsApi = {
 
 // HTTP Provider API Keys
 export const httpProviderApi = {
-  listKeys: () => api.get<APIKey[]>('/api/http/provider'),
-  createKey: (key: CreateAPIKeyRequest) => api.post<APIKey>('/api/http/provider', key),
+  listKeys: () => api.get<APIKeyListItem[]>('/api/http/provider'),
+  createKey: (key: CreateAPIKeyRequest) => api.post<APIKeyCreatedResponse>('/api/http/provider', key),
   deleteKey: (id: number) => api.delete(`/api/http/provider/${id}`),
 }
 
-// Traefik Configuration (for Traefik polling - requires x-auth-key header)
+// Traefik Configuration (for Traefik polling - requires x-traefikr-key header)
 export const configApi = {
   get: () => api.get('/api/config'),
 }

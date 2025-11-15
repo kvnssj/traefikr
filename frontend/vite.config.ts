@@ -12,14 +12,14 @@ export default defineConfig({
   },
   server: {
     host: true,
-    port: parseInt(process.env.VITE_PORT || '3000'),
+    port: parseInt(process.env.TRAEFIKR_PORT || '3000'),
     watch: {
       usePolling: true,  // Required for Docker on Windows/Mac
       interval: 1000,    // Check for changes every second
     },
     hmr: {
       host: '127.0.0.1',
-      port: parseInt(process.env.VITE_PORT || '3000'),
+      port: parseInt(process.env.TRAEFIKR_PORT || '3000'),
       protocol: 'ws',
     },
   },

@@ -25,14 +25,14 @@ services:
 
   backend:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
     environment:
       - TRAEFIKR_DB_PATH=/data/traefikr.db
-#      - TRAEFIKR_PORT=8080
+      - TRAEFIKR_PORT=8080
       - TRAEFIK_API_URL=http://traefik:8080
     ports:
-      - "8000:8080"  # Expose unified app (API + UI) on host port 8000
+      - "8000:8080"  # Expose backend API on host port 8000
     volumes:
       - backend-data:/data
     networks:
@@ -41,14 +41,26 @@ services:
 
     labels:
       - "traefik.enable=true"
-      # Route for the web UI
-      - "traefik.http.routers.manager.rule=Host(`manager.localhost`)"
-      - "traefik.http.routers.manager.service=manager"
-      - "traefik.http.services.manager.loadbalancer.server.port=8080"
-      # Route for API access
-#      - "traefik.http.routers.api.rule=Host(`api.localhost`)"
-#      - "traefik.http.routers.api.service=api"
-#      - "traefik.http.services.api.loadbalancer.server.port=8080"
+      - "traefik.http.routers.backend.rule=Host(`api.localhost`)"
+      - "traefik.http.services.backend.loadbalancer.server.port=8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile-dev
+    volumes:
+      - ./frontend:/frontend
+    environment:
+      # Only needed when frontend runs separately from backend for dev
+      - VITE_TRAEFIKR_API_URL=http://api.localhost
+    ports:
+      - "3000:3000"  # Expose for direct access and HMR
+    networks:
+      - traefikr
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`manager.localhost`)"
+      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
 
   # Example services to manage
   whoami:

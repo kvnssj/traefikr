@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"traefikr/handlers"
 	"traefikr/middleware"
@@ -58,7 +59,7 @@ func main() {
 	setupRoutes(r, db)
 
 	// Start server
-	port := os.Getenv("PORT")
+	port := os.Getenv("TRAEFIKR_PORT")
 	if port == "" {
 		port = "8080"
 	}
@@ -78,6 +79,23 @@ func generateRandomPassword(length int) string {
 }
 
 func setupRoutes(r *gin.Engine, db *models.DB) {
+	// CORS middleware - allow all origins, methods, and auth headers
+	r.Use(func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, x-traefikr-key")
+		c.Writer.Header().Set("Access-Control-Expose-Headers", "Content-Length")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Max-Age", "86400")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	})
+
 	// Initialize handlers
 	resourceHandler := handlers.NewResourceHandler(db)
 	configHandler := handlers.NewConfigHandler(db)
@@ -85,11 +103,12 @@ func setupRoutes(r *gin.Engine, db *models.DB) {
 	providerHandler := handlers.NewProviderHandler(db)
 	authHandler := handlers.NewAuthHandler(db)
 
-	// Health check (public)
+	// 1. Health check (public)
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
 
+	// 2. API routes
 	api := r.Group("/api")
 	{
 		// Authentication endpoints (public)
@@ -99,7 +118,7 @@ func setupRoutes(r *gin.Engine, db *models.DB) {
 		api.GET("/:protocol/:type/schema.json", resourceHandler.GetSchema)
 
 		// Config endpoint (conditional API key auth - for Traefik polling)
-		// Requires x-auth-key header if API keys exist in database
+		// Requires x-traefikr-key header if API keys exist in database
 		api.GET("/config", middleware.ConditionalAuthMiddleware(db), configHandler.GetConfig)
 
 		// Protected endpoints (require JWT token from user login)
@@ -123,4 +142,22 @@ func setupRoutes(r *gin.Engine, db *models.DB) {
 			protected.DELETE("/http/provider/:id", providerHandler.DeleteAPIKey)
 		}
 	}
+
+	// 3. Static assets and SPA routing
+	r.Static("/assets", "/static/assets")
+	r.StaticFile("/", "/static/index.html")
+	r.StaticFile("/index.html", "/static/index.html")
+	r.StaticFile("/traefikr_logo.svg", "/static/traefikr_logo.svg")
+
+	// 4. SPA fallback - serve index.html for all other routes
+	r.NoRoute(func(c *gin.Context) {
+		// If it's an API route that doesn't exist, return 404 JSON
+		if strings.HasPrefix(c.Request.URL.Path, "/api/") {
+			c.JSON(404, gin.H{"error": "Not found"})
+			return
+		}
+
+		// Everything else gets index.html (SPA client-side routing)
+		c.File("/static/index.html")
+	})
 }
