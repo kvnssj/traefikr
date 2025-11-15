@@ -1,24 +1,28 @@
 import { Outlet, NavLink as RouterNavLink, useNavigate } from 'react-router-dom'
 import { AppShell, Burger, Group, Title, Text, NavLink, Button, Avatar, Menu, Badge, Box } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
-import { 
-  IconHome, 
-  IconRouter, 
-  IconServer, 
-  IconSettings2, 
-  IconCloud,
+import {
+  IconHome,
+  IconRouter,
+  IconServer,
+  IconSettings2,
+  IconSettings,
   IconLogout,
   IconUser,
   IconNetwork,
   IconLock,
-  IconPlugConnected
+  IconPlugConnected,
+  IconKey
 } from '@tabler/icons-react'
 import { useAuth } from '@/contexts/AuthContext'
+import ChangePasswordModal from '@/components/ChangePasswordModal'
+import { useState } from 'react'
 
 export default function Layout() {
   const [opened, { toggle }] = useDisclosure()
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const [changePasswordOpened, setChangePasswordOpened] = useState(false)
 
   const handleLogout = async () => {
     await logout()
@@ -33,7 +37,7 @@ export default function Layout() {
     { path: '/entrypoints', label: 'Entrypoints', icon: IconNetwork },
     { path: '/transports', label: 'Servers Transport', icon: IconPlugConnected },
     // { path: '/tls', label: 'TLS', icon: IconLock },
-    { path: '/settings', label: 'Settings', icon: IconCloud },
+    { path: '/settings', label: 'Settings', icon: IconSettings },
   ]
 
   return (
@@ -82,8 +86,11 @@ export default function Layout() {
 
             <Menu.Dropdown>
               <Menu.Label>Account</Menu.Label>
-              <Menu.Item leftSection={<IconUser size={16} />}>
-                Profile
+              <Menu.Item
+                leftSection={<IconKey size={16} />}
+                onClick={() => setChangePasswordOpened(true)}
+              >
+                Change Password
               </Menu.Item>
               <Menu.Divider />
               <Menu.Item
@@ -135,6 +142,11 @@ export default function Layout() {
       <AppShell.Main>
         <Outlet />
       </AppShell.Main>
+
+      <ChangePasswordModal
+        opened={changePasswordOpened}
+        onClose={() => setChangePasswordOpened(false)}
+      />
     </AppShell>
   )
 }

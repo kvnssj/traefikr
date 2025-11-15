@@ -7,11 +7,12 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedByDefault=false"
       - "--providers.http.endpoint=http://backend:8080/api/config"
-      - "--providers.http.headers.x-traefikr-key=sk_pxeZDx99Dx26iE7IhyQy2D-B42UF6aZSFUZolVM8ExM="
       - "--providers.http.pollInterval=5s"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       - "--log.level=DEBUG"
+      # Enable this once you have generated an api key and replace the key below with the one you generated.
+      #- "--providers.http.headers.x-traefikr-key=sk_pxeZDx99Dx26iE7IhyQy2D-B42UF6aZSFUZolVM8ExM="
     ports:
       - "80:80"
       - "443:443"
@@ -29,10 +30,7 @@ services:
       dockerfile: Dockerfile
     environment:
       - TRAEFIKR_DB_PATH=/data/traefikr.db
-#      - TRAEFIKR_PORT=8080
       - TRAEFIK_API_URL=http://traefik:8080
-    ports:
-      - "8000:8080"  # Expose unified app (API + UI) on host port 8000
     volumes:
       - backend-data:/data
     networks:
@@ -41,14 +39,10 @@ services:
 
     labels:
       - "traefik.enable=true"
-      # Route for the web UI
+      # Route for the web UI (http://manager.localhost)
       - "traefik.http.routers.manager.rule=Host(`manager.localhost`)"
       - "traefik.http.routers.manager.service=manager"
       - "traefik.http.services.manager.loadbalancer.server.port=8080"
-      # Route for API access
-#      - "traefik.http.routers.api.rule=Host(`api.localhost`)"
-#      - "traefik.http.routers.api.service=api"
-#      - "traefik.http.services.api.loadbalancer.server.port=8080"
 
   # Example services to manage
   whoami:
@@ -64,7 +58,6 @@ services:
 
 networks:
   traefikr:
-    driver: bridge
 
 volumes:
   backend-data:

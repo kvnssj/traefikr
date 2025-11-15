@@ -2,6 +2,7 @@
 .idea
 *.iml
 .claude
+dist
 
 node_modules
 

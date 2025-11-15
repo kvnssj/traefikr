@@ -125,6 +125,9 @@ func setupRoutes(r *gin.Engine, db *models.DB) {
 		protected := api.Group("")
 		protected.Use(middleware.JWTAuthMiddleware(db))
 		{
+			// Auth endpoints (password change)
+			protected.PUT("/auth/password", authHandler.ChangePassword)
+
 			// Resource endpoints
 			protected.GET("/:protocol/:type", resourceHandler.ListResources)
 			protected.GET("/:protocol/:type/:nameProvider", resourceHandler.GetResource)

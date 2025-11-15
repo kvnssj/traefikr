@@ -90,10 +90,21 @@ export interface LoginResponse {
   message: string
 }
 
+export interface ChangePasswordRequest {
+  old_password: string
+  new_password: string
+}
+
+export interface ChangePasswordResponse {
+  message: string
+}
+
 // Authentication API
 export const authApi = {
   login: (credentials: LoginRequest) =>
     api.post<LoginResponse>('/api/auth/login', credentials),
+  changePassword: (data: ChangePasswordRequest) =>
+    api.put<ChangePasswordResponse>('/api/auth/password', data),
 }
 
 // Generic Resource API - works with any protocol/type combination

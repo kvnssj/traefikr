@@ -5,244 +5,275 @@
 </p>
 
 <p align="center">
-  <strong>A modern, user-friendly configuration management interface for Traefik v3.6</strong>
+  <strong>Manage your Traefik configurations with ease and confidence</strong>
 </p>
 
 <p align="center">
+  <a href="#why-traefikr">Why Traefikr</a> •
+  <a href="#screenshots">Screenshots</a> •
+  <a href="#getting-started">Getting Started</a> •
   <a href="#features">Features</a> •
-  <a href="#quick-start">Quick Start</a> •
-  <a href="#documentation">Documentation</a> •
-  <a href="#architecture">Architecture</a> •
-  <a href="#contributing">Contributing</a>
+  <a href="#documentation">Documentation</a>
 </p>
 
 ---
 
-## Overview
+## Why Traefikr?
 
-Traefikr is a comprehensive REST API and web interface for managing Traefik v3.6 configurations. It provides a clean, intuitive UI for creating and managing routers, services, middlewares, and more, with full JSON schema validation and real-time synchronization with Traefik.
+Managing Traefik configurations through YAML files can be challenging—tracking changes, validating syntax, and ensuring everything works correctly before deployment. **Traefikr** brings simplicity and confidence to Traefik management with an intuitive web interface that makes configuration feel effortless.
 
-## Features
+### What Makes Traefikr Special
 
-### 🎯 Core Capabilities
+✨ **Visual Configuration Management** - No more wrestling with YAML syntax. Configure routers, services, and middlewares through beautiful, guided forms that validate your input in real-time.
 
-- **Full Resource Management**: Create, read, update, and delete Traefik resources
-  - HTTP/TCP/UDP Routers
-  - HTTP/TCP/UDP Services
-  - HTTP/TCP Middlewares
-  - TLS Certificates and Options
-  - Server Transports
+🛡️ **Built-in Safety** - Every configuration is validated against Traefik v3.6 schemas before being saved. Catch errors before they affect your infrastructure.
 
-- **Schema-Driven Forms**: Dynamic forms generated from Traefik v3.6 JSON schemas
-  - Real-time validation
-  - Inline documentation
-  - Type-safe configuration
+⚡ **Instant Updates** - Changes sync with Traefik immediately. No manual reloads or restarts needed.
 
-- **Dual Authentication**
-  - JWT-based user authentication for web UI
-  - API key authentication for Traefik HTTP provider polling
-  - Secure, isolated authentication flows
+🎯 **Organized Workspace** - See all your configurations at a glance. Quickly find what you need with search and filtering.
 
-### 🚀 Technical Highlights
+🔐 **Secure by Design** - Enterprise-grade authentication, encrypted passwords, and API key management keep your infrastructure protected.
 
-- **Lightweight Backend**: Go-based API with SQLite persistence (~40MB Docker image)
-- **Modern Frontend**: React + TypeScript + Mantine UI
-- **Unified Container**: Single Docker image with embedded frontend
-- **Production Ready**: FROM scratch container, fully static binary
-- **Real-time Sync**: Traefik polls `/api/config` for instant updates
+🚀 **Lightweight & Fast** - The entire application runs in a single ~40MB Docker container. Minimal resource usage, maximum performance.
 
-### 🔒 Security
+## Screenshots
 
-- Bcrypt password hashing
-- JWT token authentication (24-hour expiry)
-- API key-based access control for Traefik
-- CORS protection
-- Static binary with no external dependencies
+### Secure Login
+<p align="center">
+  <img src="screenshots/01-login.png" alt="Login Screen" width="800">
+</p>
 
-## Quick Start
+Start with a secure login. On first launch, Traefikr generates a strong admin password for you.
 
-### Prerequisites
+---
 
-- Docker and Docker Compose
-- Traefik v3.6 (optional, for testing)
+### Dashboard Overview
+<p align="center">
+  <img src="screenshots/02-dashboard.png" alt="Dashboard" width="800">
+</p>
 
-### Installation
+Get a complete overview of your Traefik configuration at a glance. Monitor routers, services, and middlewares all in one place.
 
-1. Clone the repository:
+---
+
+### Router Management
+<p align="center">
+  <img src="screenshots/03-routers.png" alt="Routers Page" width="800">
+</p>
+
+Create and manage HTTP, TCP, and UDP routers with ease. Visual forms guide you through every option with helpful descriptions.
+
+---
+
+### Smart Configuration Forms
+<p align="center">
+  <img src="screenshots/08-create-router-form.png" alt="Create Router Form" width="800">
+</p>
+
+Intelligent forms with real-time validation make configuration effortless. Every field includes helpful descriptions, and the interface guides you through complex options with ease. No more guessing or checking documentation!
+
+---
+
+### Service Configuration
+<p align="center">
+  <img src="screenshots/04-services.png" alt="Services Page" width="800">
+</p>
+
+Configure load balancers and upstream services effortlessly. Add servers, adjust weights, and configure health checks—all without touching a config file.
+
+---
+
+### Middleware Control
+<p align="center">
+  <img src="screenshots/05-middlewares.png" alt="Middlewares Page" width="800">
+</p>
+
+Set up authentication, rate limiting, headers, and more. Traefikr supports all Traefik middleware types with schema-validated forms.
+
+---
+
+### Settings & API Keys
+<p align="center">
+  <img src="screenshots/06-settings.png" alt="Settings Page" width="800">
+</p>
+
+Manage API keys for Traefik to pull configurations. Create, view, and revoke keys with a single click.
+
+---
+
+### Change Password
+<p align="center">
+  <img src="screenshots/07-change-password.png" alt="Change Password Modal" width="800">
+</p>
+
+Keep your account secure by changing your password anytime from the user menu.
+
+---
+
+## Getting Started
+
+### Quick Setup (5 Minutes)
+
+Get Traefikr running in just a few steps:
+
+1. **Clone and start**:
    ```bash
    git clone https://github.com/yourusername/traefikr.git
    cd traefikr
-   ```
-
-2. Start the services:
-   ```bash
    docker-compose up -d
    ```
 
-3. Get your admin credentials from the logs:
+2. **Get your admin password**:
    ```bash
-   docker-compose logs backend | grep "Initial Admin Credentials"
+   docker-compose logs backend | grep "Password:"
    ```
-
-4. Access the web interface:
+   You'll see something like:
    ```
-   http://localhost (via Traefik)
-   # or
-   http://localhost:8000 (direct access)
+   Password: jSmiVnQZ5LL0m-8x
    ```
+   **Save this password!** It's shown only once.
 
-### First Login
+3. **Open Traefikr**:
+   - Navigate to `http://localhost` (via Traefik)
+   - Or `http://localhost:8000` (direct access)
+   - Login with username `admin` and your generated password
 
-On first startup, Traefikr creates an admin user with a randomly generated password. Save these credentials immediately—they won't be shown again!
+4. **Start managing your Traefik!**
 
-```
-==================================================
-Initial Admin Credentials
-Username: admin
-Password: jSmiVnQZ5LL0m-8x
-==================================================
-```
+That's it! You're ready to create routers, services, and middlewares through the beautiful web interface.
 
-## Architecture
+### What You Need
 
-### System Components
+- **Docker & Docker Compose** - That's all! Everything else is included.
+- **Optional**: Traefik v3.6 if you want to test with a real proxy
 
-```
-┌─────────────┐      ┌──────────────┐      ┌─────────────┐
-│   Traefik   │─────>│   Traefikr   │<─────│   Browser   │
-│   (Proxy)   │      │   (Backend)  │      │   (Admin)   │
-└─────────────┘      └──────────────┘      └─────────────┘
-      │                      │
-      │                      │
-      └──── Polls /api/config (API Key)
-                             │
-                             └──── JWT Auth (Users)
-```
+## Features
 
-### Backend Structure
+### Complete Resource Management
 
-- **Go 1.24** with Gin web framework
-- **SQLite** for configuration persistence
-- **Embedded schemas** for validation (compiled into binary)
-- **FROM scratch** Docker image for minimal attack surface
+Traefikr gives you full control over your Traefik configuration:
 
-### Frontend Structure
+- **Routers** (HTTP, TCP, UDP) - Route traffic based on hostnames, paths, SNI, and more
+- **Services** (HTTP, TCP, UDP) - Configure load balancers and upstream servers
+- **Middlewares** (HTTP, TCP) - Add authentication, rate limiting, headers, compression, and more
+- **TLS** - Manage certificates and TLS options
+- **Server Transports** - Configure how Traefik communicates with backends
 
-- **React 18** with TypeScript
-- **Mantine UI** component library
-- **TanStack Query** for data fetching
-- **React Router** for navigation
-- **Vite** for fast builds
+### Smart Forms & Validation
 
-## Development
+Forget memorizing configuration options:
 
-### Backend Development
+- **Schema-driven forms** automatically show all available options for each resource type
+- **Real-time validation** catches errors as you type
+- **Helpful descriptions** explain what each option does
+- **Intelligent field types** - dropdowns for enums, toggles for booleans, structured inputs for complex objects
 
-```bash
-cd backend
+### Secure Authentication
 
-# Install dependencies
-go mod download
+Two layers of security protect your infrastructure:
 
-# Run locally
-DB_PATH=./traefikr.db PORT=8080 TRAEFIK_API_URL=http://localhost:8080 ./traefikr
+- **User authentication** with JWT tokens for web access
+- **API key authentication** for Traefik to poll configurations
+- **Password security** with bcrypt hashing (never stored in plain text)
+- **Password management** - change your password anytime from the UI
+- **Auto-generated credentials** on first launch for immediate security
 
-# Build
-go build -o traefikr .
-```
+### Real-time Synchronization
 
-### Frontend Development
+Changes appear instantly:
 
-```bash
-cd frontend
+- Traefik polls Traefikr every 5 seconds for updates
+- No manual configuration reloads needed
+- See your changes take effect immediately
+- Toggle resources on/off without deleting them
 
-# Install dependencies
-npm install
+### Built for Production
 
-# Run dev server
-npm run dev
+Traefikr is designed to be reliable and secure:
 
-# Build for production
-npm run build
-```
-
-### Using Development Compose
-
-For development with hot reload:
-
-```bash
-docker-compose -f docker-compose.dev.yml up
-```
+- **Minimal footprint** - ~40MB Docker image from scratch
+- **No dependencies** - Fully static binary with embedded frontend
+- **SQLite persistence** - All configurations stored reliably
+- **CORS protection** and secure headers
+- **Battle-tested** Go backend with comprehensive validation
 
 ## Configuration
 
-### Environment Variables
+### Connecting Traefik to Traefikr
 
-#### Backend
-- `DB_PATH`: SQLite database location (default: `/data/traefikr.db`)
-- `TRAEFIKR_PORT`: Server port (default: `8080`)
-- `TRAEFIK_API_URL`: Traefik API endpoint (default: `http://traefik:8080`)
-- `JWT_SECRET`: JWT signing key (auto-generated if not set)
-
-#### Frontend
-- `VITE_TRAEFIKR_API_URL`: API base URL (default: same-origin)
-
-### Traefik Integration
-
-Configure Traefik to poll the Traefikr HTTP provider:
+Tell Traefik where to find Traefikr by adding this to your Traefik static configuration:
 
 ```yaml
-# traefik.yml (static configuration)
+# traefik.yml
+providers:
+  http:
+    endpoint: "http://backend:8080/api/config"
+    pollInterval: "5s"
+```
+
+If you've created API keys in Traefikr (Settings page), add authentication:
+
+```yaml
+# traefik.yml
 providers:
   http:
     endpoint: "http://backend:8080/api/config"
     headers:
-      x-traefikr-key: "your-api-key-here"  # Optional: only if API keys are configured
+      x-traefikr-key: "your-api-key-here"
     pollInterval: "5s"
 ```
 
-Create API keys in the Traefikr Settings page.
+### Environment Variables
 
-## API Documentation
+Customize Traefikr's behavior with these environment variables:
+
+#### Backend
+- `TRAEFIKR_DB_PATH` - Where to store the database (default: `/data/traefikr.db`)
+- `TRAEFIKR_PORT` - Port to listen on (default: `8080`)
+- `TRAEFIK_API_URL` - Traefik API endpoint (default: `http://traefik:8080`)
+- `JWT_SECRET` - JWT signing key (auto-generated if not provided)
+
+#### Frontend
+- `VITE_TRAEFIKR_API_URL` - API base URL (default: same-origin)
+
+## How It Works
+
+Traefikr acts as a central configuration hub for Traefik:
+
+```
+┌─────────────┐      ┌──────────────┐      ┌─────────────┐
+│   Traefik   │─────>│   Traefikr   │<─────│     You     │
+│   (Proxy)   │      │   (Manager)  │      │  (Browser)  │
+└─────────────┘      └──────────────┘      └─────────────┘
+      │                      │
+      │                      │
+      └──── Polls for configs (every 5s)
+                             │
+                             └──── Stores in SQLite
+```
+
+1. **You configure** routers, services, and middlewares through the web UI
+2. **Traefikr validates** and stores your configurations in SQLite
+3. **Traefik polls** Traefikr every 5 seconds to check for updates
+4. **Changes apply** automatically without restarts
+
+It's that simple!
+
+## API Access
+
+Traefikr provides a complete REST API for automation:
 
 ### Authentication
-
-#### User Login
 ```bash
-POST /api/auth/login
-Content-Type: application/json
-
-{
-  "username": "admin",
-  "password": "your-password"
-}
+# Login to get a JWT token
+curl -X POST http://localhost:8000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "password": "your-password"}'
 ```
 
-Returns a JWT token for authenticated requests.
-
-#### API Key (Traefik)
+### Create Resources
 ```bash
-GET /api/config
-x-traefikr-key: your-api-key
-```
-
-### Resources
-
-All CRUD operations follow the pattern:
-```
-GET    /api/{protocol}/{type}                    # List resources
-GET    /api/{protocol}/{type}/{name@provider}    # Get resource
-POST   /api/{protocol}/{type}                    # Create resource
-PUT    /api/{protocol}/{type}/{name@provider}    # Update resource
-DELETE /api/{protocol}/{type}/{name@provider}    # Delete resource
-```
-
-**Protocols**: `http`, `tcp`, `udp`
-**Types**: `routers`, `services`, `middlewares`, `serversTransport`, `tls`
-
-### Example: Create HTTP Router
-
-```bash
+# Create an HTTP router
 curl -X POST http://localhost:8000/api/http/routers \
   -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
@@ -257,84 +288,99 @@ curl -X POST http://localhost:8000/api/http/routers \
   }'
 ```
 
-## Testing
+### Resource Operations
 
+All resources follow the same intuitive pattern:
+
+```
+GET    /api/{protocol}/{type}                    # List all
+GET    /api/{protocol}/{type}/{name@provider}    # Get one
+POST   /api/{protocol}/{type}                    # Create
+PUT    /api/{protocol}/{type}/{name@provider}    # Update
+DELETE /api/{protocol}/{type}/{name@provider}    # Delete
+```
+
+**Protocols**: `http`, `tcp`, `udp`
+**Types**: `routers`, `services`, `middlewares`, `serversTransport`, `tls`
+
+Full API documentation available in [openapi.json](backend/openapi.json).
+
+## Development
+
+Want to contribute or customize Traefikr? We've made it easy!
+
+### Backend Development
 ```bash
-# Test authentication
-./tests/test_auth.sh
-
-# Create test resources
-./tests/create_fixed_resources.sh
-
-# Create all middleware types
-./tests/create_middlewares.sh
-
-# Delete all resources
-./tests/delete_all_resources.sh
+cd backend
+go mod download
+DB_PATH=./traefikr.db PORT=8080 go run main.go
 ```
 
-## Project Structure
-
-```
-traefikr/
-├── backend/
-│   ├── handlers/          # HTTP request handlers
-│   ├── middleware/        # Authentication middleware
-│   ├── models/            # Database models
-│   ├── schemas/           # JSON schemas for validation
-│   ├── utils/             # Traefik client and utilities
-│   ├── main.go            # Entry point
-│   └── Dockerfile         # Backend-only build (deprecated)
-├── frontend/
-│   ├── src/
-│   │   ├── components/    # Reusable React components
-│   │   ├── contexts/      # React contexts (auth, etc.)
-│   │   ├── lib/           # API client and utilities
-│   │   └── pages/         # Page components
-│   ├── public/            # Static assets
-│   └── Dockerfile-dev     # Frontend-only build (dev)
-├── tests/                 # Integration tests
-├── Dockerfile             # Unified production build
-├── docker-compose.yml     # Production compose
-└── docker-compose.dev.yml # Development compose
+### Frontend Development
+```bash
+cd frontend
+npm install
+npm run dev
 ```
 
-## Contributing
+### Build Production Image
+```bash
+docker-compose build
+```
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-### Development Workflow
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Test thoroughly
-5. Commit your changes (`git commit -m 'Add amazing feature'`)
-6. Push to the branch (`git push origin feature/amazing-feature`)
-7. Open a Pull Request
+See [CLAUDE.md](CLAUDE.md) for detailed technical documentation.
 
 ## Roadmap
 
-- [ ] User management UI
-- [ ] Configuration import/export
-- [ ] Configuration templates
+We're constantly improving Traefikr. Here's what's coming:
+
+- [ ] Multi-user management with role-based access
+- [ ] Configuration import/export (backup & restore)
+- [ ] Configuration templates for common setups
 - [ ] Multi-instance Traefik support
-- [ ] Metrics and monitoring dashboard
-- [ ] Audit logging
-- [ ] RBAC (Role-Based Access Control)
+- [ ] Monitoring dashboard with metrics
+- [ ] Audit logging for compliance
+- [ ] Dark mode (because why not?)
+
+## Support
+
+Having trouble? We're here to help!
+
+- **Documentation**: Check [CLAUDE.md](CLAUDE.md) for technical details
+- **Issues**: Report bugs on [GitHub Issues](https://github.com/yourusername/traefikr/issues)
+- **Discussions**: Ask questions in [GitHub Discussions](https://github.com/yourusername/traefikr/discussions)
+
+## Contributing
+
+We love contributions! Whether it's:
+
+- 🐛 Bug reports
+- 💡 Feature suggestions
+- 📝 Documentation improvements
+- 🔧 Code contributions
+
+Check out our [Contributing Guide](CONTRIBUTING.md) to get started.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Traefikr is open source software licensed under the [MIT License](LICENSE). Use it, modify it, share it!
 
 ## Acknowledgments
 
-- [Traefik](https://traefik.io/) - The amazing reverse proxy this tool manages
-- [Mantine](https://mantine.dev/) - Beautiful React component library
-- Go Gopher logo inspiration for our Traefikr mascot
+Built with amazing open source tools:
+
+- **[Traefik](https://traefik.io/)** - The incredible reverse proxy that makes all this possible
+- **[Mantine](https://mantine.dev/)** - Beautiful React components that make the UI shine
+- **[Gin](https://gin-gonic.com/)** - Fast and elegant Go web framework
+- **[SQLite](https://sqlite.org/)** - Reliable, embedded database
 
 ---
 
 <p align="center">
-  Made with ❤️ by the Traefikr team
+  <strong>Ready to simplify your Traefik management?</strong><br>
+  <code>docker-compose up -d</code> and you're on your way!
+</p>
+
+<p align="center">
+  Made with ❤️ for the Traefik community
 </p>
