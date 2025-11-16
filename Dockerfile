@@ -44,6 +44,8 @@ RUN ldd main || echo "Static binary confirmed"
 # Stage 3: Final minimal image
 FROM scratch
 
+ENV GIN_MODE=release
+
 # Copy CA certificates for HTTPS
 COPY --from=backend-builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
