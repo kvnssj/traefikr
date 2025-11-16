@@ -7,7 +7,7 @@ services:
       - "--api.disabledashboardad=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedByDefault=false"
-      - "--providers.http.endpoint=http://backend:8080/api/config"
+      - "--providers.http.endpoint=http://traefikr:8080/api/config"
       - "--providers.http.pollInterval=5s"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
@@ -27,9 +27,9 @@ services:
       - "traefik.http.routers.dashboard.rule=(Host(`traefik.localhost`) || Host(`traefik`)) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.middlewares=auth"
-      - "traefik.http.middlewares.auth.basicauth.users=test:$$apr1$$H6uskkkW$$IgXLP6ewTrSuBkTrqE8wj/,test2:$$apr1$$d9hr9HBB$$4HxwgUir3HP4EsggP/QNo0"
+      - "traefik.http.middlewares.auth.basicauth.users=test:$$apr1$$H6uskkkW$$IgXLP6ewTrSuBkTrqE8wj/"
 
-  backend:
+  traefikr:
     # Option 1: Use pre-built image from GitHub Container Registry (recommended for production)
     # image: ghcr.io/allfro/traefikr:latest
 
@@ -41,23 +41,25 @@ services:
     environment:
       - TRAEFIKR_DB_PATH=/data/traefikr.db
       - TRAEFIK_API_URL=http://traefik
-      # Traefik API authentication (uncomment if needed)
+      # Traefik API authentication (uncomment if api.insecure=false and using basic auth)
       - TRAEFIK_BASIC_AUTH_USERNAME=test
       - TRAEFIK_BASIC_AUTH_PASSWORD=test
+      - GIN_MODE=release
+      # Traefik API authentication (uncomment if api.insecure=false and using api header auth)
       # - TRAEFIK_API_KEY_HEADER=X-API-Key
       # - TRAEFIK_API_KEY_SECRET=your-api-key
     volumes:
-      - backend-data:/data
+      - traefikr-data:/data
     networks:
       - traefikr
     restart: unless-stopped
 
     labels:
       - "traefik.enable=true"
-      # Route for the web UI (http://manager.localhost)
-      - "traefik.http.routers.manager.rule=Host(`manager.localhost`)"
-      - "traefik.http.routers.manager.service=manager"
-      - "traefik.http.services.manager.loadbalancer.server.port=8080"
+      # Route for the web UI (http://traefikr.localhost). Add to /etc/hosts if necessary
+      - "traefik.http.routers.traefikr.rule=Host(`traefikr.localhost`)"
+      - "traefik.http.routers.traefikr.service=traefikr"
+      - "traefik.http.services.traefikr.loadbalancer.server.port=8080"
 
   # Example services to manage
   whoami:
@@ -66,10 +68,6 @@ services:
       replicas: 2
     networks:
       - traefikr
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host(`whoami.localhost`)"
-      - "traefik.http.services.whoami.loadbalancer.server.port=80"
 
   nginx:
     image: nginx
@@ -80,4 +78,4 @@ networks:
   traefikr:
 
 volumes:
-  backend-data:
+  traefikr-data:
