@@ -148,7 +148,7 @@ docker-compose up -d
 
 3. **Open Traefikr**:
    - Navigate to `http://localhost` (via Traefik)
-   - Or `http://localhost:8000` (direct access)
+   - Or `http://localhost:8080` (direct access)
    - Login with username `admin` and your generated password
 
 4. **Start managing your Traefik!**
@@ -279,7 +279,7 @@ Traefikr provides a complete REST API for automation:
 ### Authentication
 ```bash
 # Login to get a JWT token
-curl -X POST http://localhost:8000/api/auth/login \
+curl -X POST http://localhost:8080/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username": "admin", "password": "your-password"}'
 ```
@@ -287,7 +287,7 @@ curl -X POST http://localhost:8000/api/auth/login \
 ### Create Resources
 ```bash
 # Create an HTTP router
-curl -X POST http://localhost:8000/api/http/routers \
+curl -X POST http://localhost:8080/api/http/routers \
   -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
