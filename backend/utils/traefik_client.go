@@ -10,8 +10,12 @@ import (
 )
 
 type TraefikClient struct {
-	baseURL string
-	client  *http.Client
+	baseURL           string
+	client            *http.Client
+	basicAuthUsername string
+	basicAuthPassword string
+	apiKeyHeader      string
+	apiKeySecret      string
 }
 
 func NewTraefikClient() *TraefikClient {
@@ -21,16 +25,35 @@ func NewTraefikClient() *TraefikClient {
 	}
 
 	return &TraefikClient{
-		baseURL: baseURL,
-		client: &http.Client{
-			Timeout: 10 * time.Second,
-		},
+		baseURL:           baseURL,
+		client:            &http.Client{Timeout: 10 * time.Second},
+		basicAuthUsername: os.Getenv("TRAEFIK_BASIC_AUTH_USERNAME"),
+		basicAuthPassword: os.Getenv("TRAEFIK_BASIC_AUTH_PASSWORD"),
+		apiKeyHeader:      os.Getenv("TRAEFIK_API_KEY_HEADER"),
+		apiKeySecret:      os.Getenv("TRAEFIK_API_KEY_SECRET"),
 	}
+}
+
+// doRequest performs an HTTP GET request with authentication headers if configured
+func (tc *TraefikClient) doRequest(url string) (*http.Response, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	// Add Basic Auth if username is configured
+	if tc.basicAuthUsername != "" {
+		req.SetBasicAuth(tc.basicAuthUsername, tc.basicAuthPassword)
+	} else if tc.apiKeyHeader != "" {
+		req.Header.Set(tc.apiKeyHeader, tc.apiKeySecret)
+	}
+
+	return tc.client.Do(req)
 }
 
 // GetEntrypoints fetches all entrypoints from Traefik
 func (tc *TraefikClient) GetEntrypoints() ([]interface{}, error) {
-	resp, err := tc.client.Get(fmt.Sprintf("%s/api/entrypoints", tc.baseURL))
+	resp, err := tc.doRequest(fmt.Sprintf("%s/api/entrypoints", tc.baseURL))
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch entrypoints: %w", err)
 	}
@@ -77,7 +100,7 @@ func (tc *TraefikClient) GetEntrypoint(name string) (map[string]interface{}, err
 func (tc *TraefikClient) GetResources(protocol, resourceType string) ([]interface{}, error) {
 	url := fmt.Sprintf("%s/api/%s/%s", tc.baseURL, protocol, resourceType)
 
-	resp, err := tc.client.Get(url)
+	resp, err := tc.doRequest(url)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch resources: %w", err)
 	}

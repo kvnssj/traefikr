@@ -193,7 +193,23 @@ TRAEFIKR_DB_PATH=/data/traefikr.db           # Database location
 TRAEFIKR_PORT=8080                            # Server port
 TRAEFIK_API_URL=http://traefik:8080  # Traefik API endpoint
 JWT_SECRET=<random>                  # JWT signing key (auto-generated if not set)
+
+# Traefik API Authentication (optional)
+TRAEFIK_BASIC_AUTH_USERNAME=<username>       # Basic auth username for Traefik API
+TRAEFIK_BASIC_AUTH_PASSWORD=<password>       # Basic auth password for Traefik API
+TRAEFIK_API_KEY_HEADER=<header-name>         # API key header name (e.g., X-API-Key)
+TRAEFIK_API_KEY_SECRET=<api-key>             # API key value
 ```
+
+### Traefik API Authentication
+
+If your Traefik API is protected with authentication, configure the appropriate environment variables:
+
+- **Basic Authentication**: Set `TRAEFIK_BASIC_AUTH_USERNAME` and `TRAEFIK_BASIC_AUTH_PASSWORD`. When the username is defined, all requests to the Traefik API will include Basic authentication headers.
+
+- **API Key Authentication**: Set `TRAEFIK_API_KEY_HEADER` (the header name) and `TRAEFIK_API_KEY_SECRET` (the key value). When the header is defined, all requests to the Traefik API will include this custom header.
+
+- **No Authentication**: If neither is configured, requests to the Traefik API will be sent without authentication headers (default behavior).
 
 ## Initial Setup
 

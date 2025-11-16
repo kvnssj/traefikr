@@ -2,8 +2,9 @@ services:
   traefik:
     image: traefik:v3.6
     command:
-      - "--api.insecure=true"
+#      - "--api.insecure=true"
       - "--api.dashboard=true"
+      - "--api.disabledashboardad=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedByDefault=false"
       - "--providers.http.endpoint=http://backend:8080/api/config"
@@ -16,13 +17,17 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "8080:8080"  # Traefik API & Dashboard
+#      - "8080:8080"  # Traefik API & Dashboard
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - traefikr
-    depends_on:
-      - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=(Host(`traefik.localhost`) || Host(`traefik`)) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.middlewares=auth"
+      - "traefik.http.middlewares.auth.basicauth.users=test:$$apr1$$H6uskkkW$$IgXLP6ewTrSuBkTrqE8wj/,test2:$$apr1$$d9hr9HBB$$4HxwgUir3HP4EsggP/QNo0"
 
   backend:
     # Option 1: Use pre-built image from GitHub Container Registry (recommended for production)
@@ -35,7 +40,12 @@ services:
 
     environment:
       - TRAEFIKR_DB_PATH=/data/traefikr.db
-      - TRAEFIK_API_URL=http://traefik:8080
+      - TRAEFIK_API_URL=http://traefik
+      # Traefik API authentication (uncomment if needed)
+      - TRAEFIK_BASIC_AUTH_USERNAME=test
+      - TRAEFIK_BASIC_AUTH_PASSWORD=test
+      # - TRAEFIK_API_KEY_HEADER=X-API-Key
+      # - TRAEFIK_API_KEY_SECRET=your-api-key
     volumes:
       - backend-data:/data
     networks:
@@ -60,6 +70,11 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.whoami.rule=Host(`whoami.localhost`)"
       - "traefik.http.services.whoami.loadbalancer.server.port=80"
+
+  nginx:
+    image: nginx
+    networks:
+      - traefikr
 
 networks:
   traefikr:
