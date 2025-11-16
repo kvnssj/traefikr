@@ -1,20 +1,20 @@
 # Traefikr
 
-<p align="center">
+<div style="text-align: center">
   <img src="frontend/public/traefikr_logo.svg" alt="Traefikr Logo" width="200" height="200">
-</p>
+</div>
 
-<p align="center">
+<div style="text-align: center">
   <strong>Manage your Traefik configurations with ease and confidence</strong>
-</p>
+</div>
 
-<p align="center">
+<div style="text-align: center">
   <a href="#why-traefikr">Why Traefikr</a> •
   <a href="#screenshots">Screenshots</a> •
   <a href="#getting-started">Getting Started</a> •
   <a href="#features">Features</a> •
-  <a href="#documentation">Documentation</a>
-</p>
+  <a href="#configuration">Configuration</a>
+</div>
 
 ---
 
@@ -39,72 +39,72 @@ Managing Traefik configurations through YAML files can be challenging—tracking
 ## Screenshots
 
 ### Secure Login
-<p align="center">
+<div style="text-align: center">
   <img src="screenshots/01-login.png" alt="Login Screen" width="800">
-</p>
+</div>
 
 Start with a secure login. On first launch, Traefikr generates a strong admin password for you.
 
 ---
 
 ### Dashboard Overview
-<p align="center">
+<div style="text-align: center">
   <img src="screenshots/02-dashboard.png" alt="Dashboard" width="800">
-</p>
+</div>
 
 Get a complete overview of your Traefik configuration at a glance. Monitor routers, services, and middlewares all in one place.
 
 ---
 
 ### Router Management
-<p align="center">
+<div style="text-align: center">
   <img src="screenshots/03-routers.png" alt="Routers Page" width="800">
-</p>
+</div>
 
 Create and manage HTTP, TCP, and UDP routers with ease. Visual forms guide you through every option with helpful descriptions.
 
 ---
 
 ### Smart Configuration Forms
-<p align="center">
+<div style="text-align: center">
   <img src="screenshots/08-create-router-form.png" alt="Create Router Form" width="800">
-</p>
+</div>
 
 Intelligent forms with real-time validation make configuration effortless. Every field includes helpful descriptions, and the interface guides you through complex options with ease. No more guessing or checking documentation!
 
 ---
 
 ### Service Configuration
-<p align="center">
+<div style="text-align: center">
   <img src="screenshots/04-services.png" alt="Services Page" width="800">
-</p>
+</div>
 
 Configure load balancers and upstream services effortlessly. Add servers, adjust weights, and configure health checks—all without touching a config file.
 
 ---
 
 ### Middleware Control
-<p align="center">
+<div style="text-align: center">
   <img src="screenshots/05-middlewares.png" alt="Middlewares Page" width="800">
-</p>
+</div>
 
 Set up authentication, rate limiting, headers, and more. Traefikr supports all Traefik middleware types with schema-validated forms.
 
 ---
 
 ### Settings & API Keys
-<p align="center">
+<div style="text-align: center">
   <img src="screenshots/06-settings.png" alt="Settings Page" width="800">
-</p>
+</div>
 
 Manage API keys for Traefik to pull configurations. Create, view, and revoke keys with a single click.
 
 ---
 
 ### Change Password
-<p align="center">
+<div style="text-align: center">
   <img src="screenshots/07-change-password.png" alt="Change Password Modal" width="800">
-</p>
+</div>
 
 Keep your account secure by changing your password anytime from the user menu.
 
@@ -138,7 +138,7 @@ docker-compose up -d
 
 2. **Get your admin password**:
    ```bash
-   docker-compose logs backend | grep "Password:"
+   docker-compose logs traefikr | grep "Password:"
    ```
    You'll see something like:
    ```
@@ -147,9 +147,9 @@ docker-compose up -d
    **Save this password!** It's shown only once.
 
 3. **Open Traefikr**:
-   - Navigate to `http://localhost` (via Traefik)
-   - Or `http://localhost:8080` (direct access)
+   - Navigate to `http://traefikr.localhost`
    - Login with username `admin` and your generated password
+   - **Note**: Add `127.0.0.1 traefikr.localhost` to `/etc/hosts` (Linux/Mac) or `C:\Windows\System32\drivers\etc\hosts` (Windows) if needed
 
 4. **Start managing your Traefik!**
 
@@ -242,12 +242,22 @@ Customize Traefikr's behavior with these environment variables:
 
 #### Backend
 - `TRAEFIKR_DB_PATH` - Where to store the database (default: `/data/traefikr.db`)
-- `TRAEFIKR_PORT` - Port to listen on (default: `8080`)
-- `TRAEFIK_API_URL` - Traefik API endpoint (default: `http://traefik:8080`)
-- `JWT_SECRET` - JWT signing key (auto-generated if not provided)
+- `TRAEFIK_API_URL` - Traefik API endpoint for fetching entrypoints and resources (default: `http://traefik`)
+- `GIN_MODE` - Gin framework mode, set to `release` for production (default: `debug`)
 
-#### Frontend
-- `VITE_TRAEFIKR_API_URL` - API base URL (default: same-origin)
+#### Traefik API Authentication (Optional)
+Configure these when your Traefik API is protected with authentication:
+
+**Basic Authentication:**
+- `TRAEFIK_BASIC_AUTH_USERNAME` - Username for Traefik API basic auth
+- `TRAEFIK_BASIC_AUTH_PASSWORD` - Password for Traefik API basic auth
+
+**API Key Authentication:**
+- `TRAEFIK_API_KEY_HEADER` - Custom header name for API key (e.g., `X-API-Key`)
+- `TRAEFIK_API_KEY_SECRET` - API key value
+
+**Note:** If `TRAEFIK_BASIC_AUTH_USERNAME` is set, basic auth will be used. Otherwise, if `TRAEFIK_API_KEY_HEADER` is 
+set, API key authentication will be used. If neither is configured, requests to Traefik API will be unauthenticated.
 
 ## How It Works
 
@@ -256,13 +266,12 @@ Traefikr acts as a central configuration hub for Traefik:
 ```
 ┌─────────────┐      ┌──────────────┐      ┌─────────────┐
 │   Traefik   │─────>│   Traefikr   │<─────│     You     │
-│   (Proxy)   │      │   (Manager)  │      │  (Browser)  │
+│   (Proxy)   │      │  (Provider)  │      │  (Browser)  │
 └─────────────┘      └──────────────┘      └─────────────┘
       │                      │
       │                      │
+      │                      └──── Stores in SQLite
       └──── Polls for configs (every 5s)
-                             │
-                             └──── Stores in SQLite
 ```
 
 1. **You configure** routers, services, and middlewares through the web UI
@@ -397,7 +406,7 @@ We love contributions! Whether it's:
 - 📝 Documentation improvements
 - 🔧 Code contributions
 
-Check out our [Contributing Guide](CONTRIBUTING.md) to get started.
+Feel free to open an issue or submit a pull request on [GitHub](https://github.com/allfro/traefikr).
 
 ## License
 
@@ -414,11 +423,11 @@ Built with amazing open source tools:
 
 ---
 
-<p align="center">
+<div style="text-align: center">
   <strong>Ready to simplify your Traefik management?</strong><br>
   <code>docker-compose up -d</code> and you're on your way!
-</p>
+</div>
 
-<p align="center">
+<div style="text-align: center">
   Made with ❤️ for the Traefik community
-</p>
+</div>
