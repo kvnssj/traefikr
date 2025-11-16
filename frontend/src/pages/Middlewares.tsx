@@ -223,7 +223,7 @@ export default function Middlewares() {
                 Configuration
               </Text>
               <StatusIcon
-                enabled={middleware.status === 'enabled' || middleware.enabled}
+                enabled={middleware.enabled}
                 enabledLabel="Enabled"
                 disabledLabel="Disabled"
               />

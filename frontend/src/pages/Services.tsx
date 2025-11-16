@@ -184,7 +184,7 @@ export default function Services() {
           {/* Status and Actions */}
           <Group justify="space-between" pt="md" style={{ borderTop: '1px solid var(--mantine-color-gray-3)' }}>
             <StatusIcon
-              enabled={service.status === 'enabled' || service.enabled}
+              enabled={service.enabled}
               enabledLabel="Enabled"
               disabledLabel="Disabled"
             />

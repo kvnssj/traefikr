@@ -62,11 +62,11 @@ func (h *ResourceHandler) ListResources(c *gin.Context) {
 			traefikResources = make([]interface{}, 0)
 		}
 
-		// Add Traefik resources first
+		// Add Traefik resources first (normalized to match database schema)
 		for _, res := range traefikResources {
 			if resMap, ok := res.(map[string]interface{}); ok {
 				if name, nameExists := resMap["name"].(string); nameExists {
-					resourceMap[name] = resMap
+					resourceMap[name] = normalizeTraefikResource(resMap)
 				}
 			}
 		}
@@ -143,8 +143,8 @@ func (h *ResourceHandler) GetResource(c *gin.Context) {
 		return
 	}
 
-	// Return resource from Traefik
-	c.JSON(http.StatusOK, traefikResource)
+	// Normalize and return resource from Traefik
+	c.JSON(http.StatusOK, normalizeTraefikResource(traefikResource))
 }
 
 // CreateResource handles POST /api/{protocol}/{type}
@@ -341,4 +341,30 @@ func parseNameProvider(nameProvider string) (string, string) {
 		return parts[0], parts[1]
 	}
 	return parts[0], "http" // default provider
+}
+
+// normalizeTraefikResource transforms a Traefik API resource to match our database schema
+func normalizeTraefikResource(traefikRes map[string]interface{}) map[string]interface{} {
+	// Extract metadata fields
+	name, _ := traefikRes["name"].(string)
+	provider, _ := traefikRes["provider"].(string)
+	status, _ := traefikRes["status"].(string)
+
+	// Create config object with all fields except metadata
+	config := make(map[string]interface{})
+	for key, value := range traefikRes {
+		// Skip metadata fields that belong at the top level
+		if key != "name" && key != "provider" && key != "status" {
+			config[key] = value
+		}
+	}
+
+	// Return normalized structure
+	return map[string]interface{}{
+		"name":     name,
+		"provider": provider,
+		"config":   config,
+		"enabled":  status == "enabled",
+		"source":   "traefik",
+	}
 }
