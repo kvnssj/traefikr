@@ -1,14 +1,14 @@
 # Traefikr
 
-<p style="text-align: center">
+<p align="center">
   <img src="frontend/public/traefikr_logo.svg" alt="Traefikr Logo" width="200" height="200">
 </p>
 
-<p style="text-align: center">
+<p align="center">
   <strong>Manage your Traefik configurations with ease and confidence</strong>
 </p>
 
-<p style="text-align: center">
+<p align="center">
   <a href="#why-traefikr">Why Traefikr</a> •
   <a href="#screenshots">Screenshots</a> •
   <a href="#getting-started">Getting Started</a> •
