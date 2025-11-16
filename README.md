@@ -1,20 +1,20 @@
 # Traefikr
 
-<div style="text-align: center">
+<p style="text-align: center">
   <img src="frontend/public/traefikr_logo.svg" alt="Traefikr Logo" width="200" height="200">
-</div>
+</p>
 
-<div style="text-align: center">
+<p style="text-align: center">
   <strong>Manage your Traefik configurations with ease and confidence</strong>
-</div>
+</p>
 
-<div style="text-align: center">
+<p style="text-align: center">
   <a href="#why-traefikr">Why Traefikr</a> •
   <a href="#screenshots">Screenshots</a> •
   <a href="#getting-started">Getting Started</a> •
   <a href="#features">Features</a> •
   <a href="#configuration">Configuration</a>
-</div>
+</p>
 
 ---
 
@@ -39,72 +39,72 @@ Managing Traefik configurations through YAML files can be challenging—tracking
 ## Screenshots
 
 ### Secure Login
-<div style="text-align: center">
+<p align="center">
   <img src="screenshots/01-login.png" alt="Login Screen" width="800">
-</div>
+</p>
 
 Start with a secure login. On first launch, Traefikr generates a strong admin password for you.
 
 ---
 
 ### Dashboard Overview
-<div style="text-align: center">
+<p align="center">
   <img src="screenshots/02-dashboard.png" alt="Dashboard" width="800">
-</div>
+</p>
 
 Get a complete overview of your Traefik configuration at a glance. Monitor routers, services, and middlewares all in one place.
 
 ---
 
 ### Router Management
-<div style="text-align: center">
+<p align="center">
   <img src="screenshots/03-routers.png" alt="Routers Page" width="800">
-</div>
+</p>
 
 Create and manage HTTP, TCP, and UDP routers with ease. Visual forms guide you through every option with helpful descriptions.
 
 ---
 
 ### Smart Configuration Forms
-<div style="text-align: center">
+<p align="center">
   <img src="screenshots/08-create-router-form.png" alt="Create Router Form" width="800">
-</div>
+</p>
 
 Intelligent forms with real-time validation make configuration effortless. Every field includes helpful descriptions, and the interface guides you through complex options with ease. No more guessing or checking documentation!
 
 ---
 
 ### Service Configuration
-<div style="text-align: center">
+<p align="center">
   <img src="screenshots/04-services.png" alt="Services Page" width="800">
-</div>
+</p>
 
 Configure load balancers and upstream services effortlessly. Add servers, adjust weights, and configure health checks—all without touching a config file.
 
 ---
 
 ### Middleware Control
-<div style="text-align: center">
+<p align="center">
   <img src="screenshots/05-middlewares.png" alt="Middlewares Page" width="800">
-</div>
+</p>
 
 Set up authentication, rate limiting, headers, and more. Traefikr supports all Traefik middleware types with schema-validated forms.
 
 ---
 
 ### Settings & API Keys
-<div style="text-align: center">
+<p align="center">
   <img src="screenshots/06-settings.png" alt="Settings Page" width="800">
-</div>
+</p>
 
 Manage API keys for Traefik to pull configurations. Create, view, and revoke keys with a single click.
 
 ---
 
 ### Change Password
-<div style="text-align: center">
+<p align="center">
   <img src="screenshots/07-change-password.png" alt="Change Password Modal" width="800">
-</div>
+</p>
 
 Keep your account secure by changing your password anytime from the user menu.
 
@@ -423,11 +423,11 @@ Built with amazing open source tools:
 
 ---
 
-<div style="text-align: center">
+<p align="center">
   <strong>Ready to simplify your Traefik management?</strong><br>
   <code>docker-compose up -d</code> and you're on your way!
-</div>
+</p>
 
-<div style="text-align: center">
+<p align="center">
   Made with ❤️ for the Traefik community
-</div>
+</p>
