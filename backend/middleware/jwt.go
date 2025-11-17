@@ -1,25 +1,32 @@
 package middleware
 
 import (
+	"crypto/rand"
+	"encoding/base64"
+	"log"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
-	"traefikr/models"
+	"traefikr/dal"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"gorm.io/gorm"
 )
 
 var jwtSecret []byte
 
 func init() {
-	secret := os.Getenv("JWT_SECRET")
+	secret := os.Getenv("TRAEFIKR_JWT_SECRET")
 	if secret == "" {
-		// Generate a random secret if not provided (for development)
-		secret = "your-secret-key-change-this-in-production"
+		// Generate a cryptographically secure random secret
+		b := make([]byte, 32) // 256 bits
+		if _, err := rand.Read(b); err != nil {
+			panic("Failed to generate JWT secret: " + err.Error())
+		}
+		secret = base64.StdEncoding.EncodeToString(b)
+		log.Println("Generated secure JWT secret (not persisted - will regenerate on restart)")
 	}
 	jwtSecret = []byte(secret)
 }
@@ -46,7 +53,7 @@ func GenerateJWT(userID uint, username string) (string, error) {
 }
 
 // JWTAuthMiddleware validates JWT tokens from Authorization header
-func JWTAuthMiddleware(db *gorm.DB) gin.HandlerFunc {
+func JWTAuthMiddleware(repo *dal.UserRepository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
@@ -84,8 +91,8 @@ func JWTAuthMiddleware(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		// Verify user still exists and is active
-		var user models.User
-		if err := db.Where("id = ? AND is_active = ?", claims.UserID, true).First(&user).Error; err != nil {
+		user, err := repo.FindByID(claims.UserID)
+		if err != nil || !user.IsActive {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found or inactive"})
 			c.Abort()
 			return

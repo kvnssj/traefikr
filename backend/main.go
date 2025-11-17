@@ -8,9 +8,11 @@ import (
 	"os"
 	"strings"
 
+	"traefikr/dal"
 	"traefikr/handlers"
 	"traefikr/middleware"
 	"traefikr/models"
+	"traefikr/utils"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -23,9 +25,16 @@ func main() {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 
+	// Initialize repositories
+	userRepo := dal.NewUserRepository(db)
+	apiKeyRepo := dal.NewAPIKeyRepository(db)
+	configRepo := dal.NewTraefikConfigRepository(db)
+
 	// Check if admin user exists, if not create one
-	var count int64
-	db.Model(&models.User{}).Count(&count)
+	count, err := userRepo.Count()
+	if err != nil {
+		log.Fatalf("Failed to count users: %v", err)
+	}
 	if count == 0 {
 		// Generate random password
 		password := generateRandomPassword(16)
@@ -34,13 +43,13 @@ func main() {
 			log.Fatalf("Failed to hash password: %v", err)
 		}
 
-		admin := models.User{
+		admin := &models.User{
 			Username:     "admin",
 			PasswordHash: string(hashedPassword),
 			IsActive:     true,
 		}
 
-		if err := db.Create(&admin).Error; err != nil {
+		if err := userRepo.Create(admin); err != nil {
 			log.Fatalf("Failed to create admin user: %v", err)
 		}
 
@@ -52,11 +61,17 @@ func main() {
 		fmt.Println("Please save these credentials! The password will not be shown again.")
 	}
 
+	// Bootstrap: Restore serverTransport TOML files on startup
+	tomlWriter := utils.NewTomlWriter()
+	if err := dal.BootstrapServerTransports(configRepo, tomlWriter); err != nil {
+		log.Printf("WARNING: Failed to bootstrap serverTransports: %v", err)
+	}
+
 	// Initialize Gin router
 	r := gin.Default()
 
 	// Set up routes
-	setupRoutes(r, db)
+	setupRoutes(r, userRepo, apiKeyRepo, configRepo)
 
 	// Start server
 	port := os.Getenv("TRAEFIKR_PORT")
@@ -78,7 +93,7 @@ func generateRandomPassword(length int) string {
 	return base64.URLEncoding.EncodeToString(b)[:length]
 }
 
-func setupRoutes(r *gin.Engine, db *models.DB) {
+func setupRoutes(r *gin.Engine, userRepo *dal.UserRepository, apiKeyRepo *dal.APIKeyRepository, configRepo *dal.TraefikConfigRepository) {
 	// CORS middleware - allow all origins, methods, and auth headers
 	r.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
@@ -97,11 +112,11 @@ func setupRoutes(r *gin.Engine, db *models.DB) {
 	})
 
 	// Initialize handlers
-	resourceHandler := handlers.NewResourceHandler(db)
-	configHandler := handlers.NewConfigHandler(db)
+	resourceHandler := handlers.NewResourceHandler(configRepo)
+	configHandler := handlers.NewConfigHandler(configRepo)
 	entrypointsHandler := handlers.NewEntrypointsHandler()
-	providerHandler := handlers.NewProviderHandler(db)
-	authHandler := handlers.NewAuthHandler(db)
+	providerHandler := handlers.NewProviderHandler(apiKeyRepo)
+	authHandler := handlers.NewAuthHandler(userRepo)
 
 	// 1. Health check (public)
 	r.GET("/health", func(c *gin.Context) {
@@ -119,11 +134,11 @@ func setupRoutes(r *gin.Engine, db *models.DB) {
 
 		// Config endpoint (conditional API key auth - for Traefik polling)
 		// Requires x-traefikr-key header if API keys exist in database
-		api.GET("/config", middleware.ConditionalAuthMiddleware(db), configHandler.GetConfig)
+		api.GET("/config", middleware.ConditionalAuthMiddleware(apiKeyRepo), configHandler.GetConfig)
 
 		// Protected endpoints (require JWT token from user login)
 		protected := api.Group("")
-		protected.Use(middleware.JWTAuthMiddleware(db))
+		protected.Use(middleware.JWTAuthMiddleware(userRepo))
 		{
 			// Auth endpoints (password change)
 			protected.PUT("/auth/password", authHandler.ChangePassword)

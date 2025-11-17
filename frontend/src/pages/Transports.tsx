@@ -256,7 +256,7 @@ export default function Transports() {
                   </ActionIcon>
                   <ActionIcon
                     variant="subtle"
-                    onClick={() => navigate(`/transports/${protocol}/${transport.name}/edit`)}
+                    onClick={() => navigate(`/transports/${protocol}/${transport.name}@${transport.provider}/edit`)}
                     disabled={transport.source === 'traefik'}
                     title="Edit transport"
                   >
@@ -265,7 +265,7 @@ export default function Transports() {
                   <ActionIcon
                     variant="subtle"
                     color="red"
-                    onClick={() => handleDelete(protocol, transport.name)}
+                    onClick={() => handleDelete(protocol, `${transport.name}@${transport.provider}`)}
                     disabled={transport.source === 'traefik'}
                     title="Delete transport"
                   >

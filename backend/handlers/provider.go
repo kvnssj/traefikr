@@ -4,25 +4,26 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"net/http"
+	"strconv"
 
+	"traefikr/dal"
 	"traefikr/models"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type ProviderHandler struct {
-	db *gorm.DB
+	repo *dal.APIKeyRepository
 }
 
-func NewProviderHandler(db *gorm.DB) *ProviderHandler {
-	return &ProviderHandler{db: db}
+func NewProviderHandler(repo *dal.APIKeyRepository) *ProviderHandler {
+	return &ProviderHandler{repo: repo}
 }
 
 // ListAPIKeys handles GET /api/http/provider
 func (h *ProviderHandler) ListAPIKeys(c *gin.Context) {
-	var keys []models.APIKey
-	if err := h.db.Find(&keys).Error; err != nil {
+	keys, err := h.repo.FindAll()
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch API keys"})
 		return
 	}
@@ -56,14 +57,14 @@ func (h *ProviderHandler) CreateAPIKey(c *gin.Context) {
 	}
 
 	// Create API key (standalone, not linked to user)
-	key := models.APIKey{
+	key := &models.APIKey{
 		Key:      apiKey,
 		Name:     req.Name,
 		Comment:  req.Comment,
 		IsActive: true,
 	}
 
-	if err := h.db.Create(&key).Error; err != nil {
+	if err := h.repo.Create(key); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create API key"})
 		return
 	}
@@ -88,13 +89,20 @@ func (h *ProviderHandler) CreateAPIKey(c *gin.Context) {
 func (h *ProviderHandler) DeleteAPIKey(c *gin.Context) {
 	id := c.Param("id")
 
-	result := h.db.Delete(&models.APIKey{}, id)
-	if result.Error != nil {
+	// Convert string id to uint
+	idUint, err := strconv.ParseUint(id, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid ID"})
+		return
+	}
+
+	rowsAffected, err := h.repo.Delete(uint(idUint))
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete API key"})
 		return
 	}
 
-	if result.RowsAffected == 0 {
+	if rowsAffected == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"error": "API key not found"})
 		return
 	}

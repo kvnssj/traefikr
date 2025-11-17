@@ -3,18 +3,17 @@ package handlers
 import (
 	"net/http"
 
-	"traefikr/models"
+	"traefikr/dal"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type ConfigHandler struct {
-	db *gorm.DB
+	repo *dal.TraefikConfigRepository
 }
 
-func NewConfigHandler(db *gorm.DB) *ConfigHandler {
-	return &ConfigHandler{db: db}
+func NewConfigHandler(repo *dal.TraefikConfigRepository) *ConfigHandler {
+	return &ConfigHandler{repo: repo}
 }
 
 // Traefik configuration structure with omitempty tags
@@ -49,8 +48,8 @@ type UDPProtocol struct {
 // GetConfig handles GET /api/config
 // Returns the full Traefik configuration in HTTP provider format
 func (h *ConfigHandler) GetConfig(c *gin.Context) {
-	var configs []models.TraefikConfig
-	if err := h.db.Where("enabled = ?", true).Find(&configs).Error; err != nil {
+	configs, err := h.repo.FindAllEnabled()
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch configuration"})
 		return
 	}

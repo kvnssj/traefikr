@@ -9,6 +9,8 @@ services:
       - "--providers.docker.exposedByDefault=false"
       - "--providers.http.endpoint=http://traefikr:8080/api/config"
       - "--providers.http.pollInterval=5s"
+      - "--providers.file.directory=/etc/traefik/dynamic"
+      - "--providers.file.watch=true"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       - "--log.level=DEBUG"
@@ -20,6 +22,7 @@ services:
 #      - "8080:8080"  # Traefik API & Dashboard
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-dynamic-config:/etc/traefik/dynamic:ro
     networks:
       - traefikr
     labels:
@@ -41,6 +44,7 @@ services:
     environment:
       - TRAEFIKR_DB_PATH=/data/traefikr.db
       - TRAEFIK_API_URL=http://traefik
+      - TRAEFIK_CONFIG_PATH=/traefik/dynamic
       # Traefik API authentication (uncomment if api.insecure=false and using basic auth)
       - TRAEFIK_BASIC_AUTH_USERNAME=test
       - TRAEFIK_BASIC_AUTH_PASSWORD=test
@@ -50,6 +54,7 @@ services:
       # - TRAEFIK_API_KEY_SECRET=your-api-key
     volumes:
       - traefikr-data:/data
+      - traefik-dynamic-config:/traefik/dynamic
     networks:
       - traefikr
     restart: unless-stopped
@@ -79,3 +84,4 @@ networks:
 
 volumes:
   traefikr-data:
+  traefik-dynamic-config:

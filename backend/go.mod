@@ -4,6 +4,8 @@ go 1.24.3
 
 require (
 	github.com/gin-gonic/gin v1.11.0
+	github.com/golang-jwt/jwt/v5 v5.3.0
+	github.com/pelletier/go-toml/v2 v2.2.4
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
 	golang.org/x/crypto v0.44.0
 	gorm.io/driver/sqlite v1.6.0
@@ -21,7 +23,6 @@ require (
 	github.com/go-playground/validator/v10 v10.27.0 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/goccy/go-yaml v1.18.0 // indirect
-	github.com/golang-jwt/jwt/v5 v5.3.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -31,7 +32,6 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/quic-go/qpack v0.5.1 // indirect
 	github.com/quic-go/quic-go v0.54.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect

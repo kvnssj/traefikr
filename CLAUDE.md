@@ -189,16 +189,17 @@ The backend runs in a **FROM scratch** container with:
 
 Backend (`docker-compose.yml` or local execution):
 ```bash
-TRAEFIKR_DB_PATH=/data/traefikr.db           # Database location
-TRAEFIKR_PORT=8080                            # Server port
-TRAEFIK_API_URL=http://traefik:8080  # Traefik API endpoint
-JWT_SECRET=<random>                  # JWT signing key (auto-generated if not set)
+TRAEFIKR_DB_PATH=/data/traefikr.db                    # Database location
+TRAEFIKR_PORT=8080                                     # Server port
+TRAEFIK_API_URL=http://traefik:8080                   # Traefik API endpoint
+TRAEFIKR_JWT_SECRET=<random>                          # JWT signing key (auto-generated 256-bit key if not set)
+TRAEFIK_CONFIG_PATH=/traefik/dynamic                  # Path to write serverTransport TOML files (optional)
 
 # Traefik API Authentication (optional)
-TRAEFIK_BASIC_AUTH_USERNAME=<username>       # Basic auth username for Traefik API
-TRAEFIK_BASIC_AUTH_PASSWORD=<password>       # Basic auth password for Traefik API
-TRAEFIK_API_KEY_HEADER=<header-name>         # API key header name (e.g., X-API-Key)
-TRAEFIK_API_KEY_SECRET=<api-key>             # API key value
+TRAEFIK_BASIC_AUTH_USERNAME=<username>                # Basic auth username for Traefik API
+TRAEFIK_BASIC_AUTH_PASSWORD=<password>                # Basic auth password for Traefik API
+TRAEFIK_API_KEY_HEADER=<header-name>                  # API key header name (e.g., X-API-Key)
+TRAEFIK_API_KEY_SECRET=<api-key>                      # API key value
 ```
 
 ### Traefik API Authentication
@@ -233,28 +234,34 @@ Please save these credentials! The password will not be shown again.
 
 ```
 backend/
-├── main.go                 # Entry point, route setup
-├── handlers/               # HTTP request handlers
-│   ├── auth.go            # Login endpoint
-│   ├── config.go          # Traefik config export
-│   ├── entrypoints.go     # Entrypoint read-only operations
-│   ├── provider.go        # API key management
-│   └── resources.go       # CRUD operations for resources
-├── middleware/            # Authentication middleware
-│   ├── auth.go           # API key authentication
-│   └── jwt.go            # JWT authentication
-├── models/                # Database models and initialization
-│   ├── api_key.go        # API key model
-│   ├── database.go       # DB initialization
-│   ├── traefik_config.go # Resource configuration model
-│   └── user.go           # User model
-├── schemas/               # Embedded JSON schemas for validation
-│   ├── validator.go      # Schema validation logic
-│   └── *.json            # Schema files (embedded at compile time)
-├── utils/                 # Utilities
-│   └── traefik_client.go # Traefik API client
-├── Dockerfile             # FROM scratch static binary build
-└── openapi.json           # OpenAPI 3.1 specification
+├── main.go                      # Entry point, route setup
+├── dal/                         # Data Access Layer (Repository pattern)
+│   ├── api_key_repository.go   # API key database operations
+│   ├── bootstrap.go             # Startup bootstrap operations
+│   ├── traefik_config_repository.go # Traefik config database operations
+│   └── user_repository.go      # User database operations
+├── handlers/                    # HTTP request handlers
+│   ├── auth.go                 # Login endpoint
+│   ├── config.go               # Traefik config export
+│   ├── entrypoints.go          # Entrypoint read-only operations
+│   ├── provider.go             # API key management
+│   └── resources.go            # CRUD operations for resources
+├── middleware/                  # Authentication middleware
+│   ├── auth.go                 # API key authentication
+│   └── jwt.go                  # JWT authentication
+├── models/                      # Database models and initialization
+│   ├── api_key.go              # API key model
+│   ├── database.go             # DB initialization
+│   ├── traefik_config.go       # Resource configuration model
+│   └── user.go                 # User model
+├── schemas/                     # Embedded JSON schemas for validation
+│   ├── validator.go            # Schema validation logic
+│   └── *.json                  # Schema files (embedded at compile time)
+├── utils/                       # Utilities
+│   ├── toml_writer.go          # ServerTransport TOML file writer
+│   └── traefik_client.go       # Traefik API client
+├── Dockerfile                   # FROM scratch static binary build
+└── openapi.json                 # OpenAPI 3.1 specification
 ```
 
 ## Important Implementation Notes

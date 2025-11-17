@@ -82,7 +82,7 @@ export default function HTTPServerTransportForm() {
   const updateMutation = useMutation({
     mutationFn: async () => {
       if (!name) throw new Error('No transport name provided')
-      const response = await resourcesApi.update('http', 'serversTransport', name, {
+      const response = await resourcesApi.update('http', 'serversTransport', `${name}`, {
         enabled: formData.enabled,
         config: formData.config,
       })

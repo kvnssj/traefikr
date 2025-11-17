@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"strings"
 
+	"traefikr/dal"
 	"traefikr/models"
 	"traefikr/schemas"
 	"traefikr/utils"
@@ -13,14 +15,16 @@ import (
 )
 
 type ResourceHandler struct {
-	db            *gorm.DB
+	repo          *dal.TraefikConfigRepository
 	traefikClient *utils.TraefikClient
+	tomlWriter    *utils.TomlWriter
 }
 
-func NewResourceHandler(db *gorm.DB) *ResourceHandler {
+func NewResourceHandler(repo *dal.TraefikConfigRepository) *ResourceHandler {
 	return &ResourceHandler{
-		db:            db,
+		repo:          repo,
 		traefikClient: utils.NewTraefikClient(),
+		tomlWriter:    utils.NewTomlWriter(),
 	}
 }
 
@@ -47,9 +51,12 @@ func (h *ResourceHandler) ListResources(c *gin.Context) {
 	// Check traefik query parameter (default: false)
 	includeTraefik := c.DefaultQuery("traefik", "false") == "true"
 
-	// Fetch from database
-	var dbConfigs []models.TraefikConfig
-	h.db.Where("protocol = ? AND type = ? AND enabled = ?", protocol, resourceType, true).Find(&dbConfigs)
+	// Fetch from database using repository
+	dbConfigs, err := h.repo.FindByProtocolAndType(protocol, resourceType)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch resources"})
+		return
+	}
 
 	// Create a map to track resources by name@provider
 	resourceMap := make(map[string]interface{})
@@ -115,9 +122,7 @@ func (h *ResourceHandler) GetResource(c *gin.Context) {
 	name, provider := parseNameProvider(nameProvider)
 
 	// First, try to fetch from database (database is source of truth)
-	var config models.TraefikConfig
-	err := h.db.Where("name = ? AND provider = ? AND protocol = ? AND type = ?",
-		name, provider, protocol, resourceType).First(&config).Error
+	config, err := h.repo.FindByKey(name, provider, protocol, resourceType)
 
 	if err == nil {
 		// Found in database
@@ -173,8 +178,10 @@ func (h *ResourceHandler) CreateResource(c *gin.Context) {
 		return
 	}
 
-	// Default provider to "http"
-	if req.Provider == "" {
+	// Set provider based on resource type
+	if resourceType == "serversTransport" {
+		req.Provider = "file"
+	} else {
 		req.Provider = "http"
 	}
 
@@ -185,7 +192,7 @@ func (h *ResourceHandler) CreateResource(c *gin.Context) {
 	}
 
 	// Create database entry
-	config := models.TraefikConfig{
+	config := &models.TraefikConfig{
 		Name:     req.Name,
 		Provider: req.Provider,
 		Protocol: protocol,
@@ -194,13 +201,21 @@ func (h *ResourceHandler) CreateResource(c *gin.Context) {
 		Config:   req.Config,
 	}
 
-	if err := h.db.Create(&config).Error; err != nil {
+	if err := h.repo.Create(config); err != nil {
 		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
 			c.JSON(http.StatusConflict, gin.H{"error": "resource already exists"})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create resource"})
 		return
+	}
+
+	// Write TOML file for serverTransport resources
+	if resourceType == "serversTransport" {
+		if err := h.tomlWriter.WriteServerTransport(protocol, resourceType, req.Name, req.Config); err != nil {
+			log.Printf("WARNING: Failed to write TOML file for serverTransport %s@%s (protocol=%s): %v",
+				req.Name, req.Provider, protocol, err)
+		}
 	}
 
 	c.JSON(http.StatusCreated, config)
@@ -239,10 +254,9 @@ func (h *ResourceHandler) UpdateResource(c *gin.Context) {
 		return
 	}
 
-	// Update database entry
-	var config models.TraefikConfig
-	if err := h.db.Where("name = ? AND provider = ? AND protocol = ? AND type = ?",
-		name, provider, protocol, resourceType).First(&config).Error; err != nil {
+	// Fetch existing resource
+	config, err := h.repo.FindByKey(name, provider, protocol, resourceType)
+	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, gin.H{"error": "resource not found"})
 			return
@@ -251,10 +265,19 @@ func (h *ResourceHandler) UpdateResource(c *gin.Context) {
 		return
 	}
 
+	// Update config and save
 	config.Config = req.Config
-	if err := h.db.Save(&config).Error; err != nil {
+	if err := h.repo.Update(config); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update resource"})
 		return
+	}
+
+	// Write TOML file for serverTransport resources
+	if resourceType == "serversTransport" {
+		if err := h.tomlWriter.WriteServerTransport(protocol, resourceType, name, req.Config); err != nil {
+			log.Printf("WARNING: Failed to update TOML file for serverTransport %s@%s (protocol=%s): %v",
+				name, provider, protocol, err)
+		}
 	}
 
 	c.JSON(http.StatusOK, config)
@@ -278,17 +301,23 @@ func (h *ResourceHandler) DeleteResource(c *gin.Context) {
 
 	name, provider := parseNameProvider(nameProvider)
 
-	result := h.db.Where("name = ? AND provider = ? AND protocol = ? AND type = ?",
-		name, provider, protocol, resourceType).Delete(&models.TraefikConfig{})
-
-	if result.Error != nil {
+	rowsAffected, err := h.repo.Delete(name, provider, protocol, resourceType)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete resource"})
 		return
 	}
 
-	if result.RowsAffected == 0 {
+	if rowsAffected == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"error": "resource not found"})
 		return
+	}
+
+	// Delete TOML file for serverTransport resources
+	if resourceType == "serversTransport" {
+		if err := h.tomlWriter.DeleteServerTransport(protocol, resourceType, name); err != nil {
+			log.Printf("WARNING: Failed to delete TOML file for serverTransport %s@%s (protocol=%s): %v",
+				name, provider, protocol, err)
+		}
 	}
 
 	c.JSON(http.StatusNoContent, nil)

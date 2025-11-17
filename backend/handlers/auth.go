@@ -3,20 +3,19 @@ package handlers
 import (
 	"net/http"
 
+	"traefikr/dal"
 	"traefikr/middleware"
-	"traefikr/models"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
 type AuthHandler struct {
-	db *gorm.DB
+	repo *dal.UserRepository
 }
 
-func NewAuthHandler(db *gorm.DB) *AuthHandler {
-	return &AuthHandler{db: db}
+func NewAuthHandler(repo *dal.UserRepository) *AuthHandler {
+	return &AuthHandler{repo: repo}
 }
 
 type LoginRequest struct {
@@ -47,8 +46,8 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	// Find user by username
-	var user models.User
-	if err := h.db.Where("username = ?", req.Username).First(&user).Error; err != nil {
+	user, err := h.repo.FindByUsername(req.Username)
+	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
@@ -94,8 +93,8 @@ func (h *AuthHandler) ChangePassword(c *gin.Context) {
 	}
 
 	// Find user by ID
-	var user models.User
-	if err := h.db.First(&user, userID).Error; err != nil {
+	user, err := h.repo.FindByID(userID.(uint))
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
@@ -121,7 +120,7 @@ func (h *AuthHandler) ChangePassword(c *gin.Context) {
 
 	// Update password
 	user.PasswordHash = string(hashedPassword)
-	if err := h.db.Save(&user).Error; err != nil {
+	if err := h.repo.Update(user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update password"})
 		return
 	}
