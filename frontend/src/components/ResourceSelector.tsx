@@ -52,10 +52,14 @@ export function ResourceSelector({
     refetchOnWindowFocus: false, // Prevent refetch race during editing
   })
 
+  const defaultList = value ? [
+      {name: value, type, protocol, config: {}, provider: "", source: undefined, enabled: true} as Resource
+  ] : []
+
   // Memoize options array to prevent recreation on every render
   const options = useMemo(
     () =>
-      (resources || []).map((resource: Resource) => ({
+      (resources || defaultList).map((resource: Resource) => ({
         value: resource.name,
         label: resource.name,
         provider: resource.provider,
