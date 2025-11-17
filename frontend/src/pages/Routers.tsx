@@ -24,11 +24,14 @@ import { resourcesApi, Resource } from '@/lib/api'
 import { DataTable, Column } from '@/components/DataTable'
 import { ProviderIcon } from '@/components/ProviderIcon'
 import { StatusIcon } from '@/components/StatusIcon'
+import { ResourceViewModal } from '@/components/ResourceViewModal'
 
 export default function Routers() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState<string>('http')
+  const [viewModalOpened, setViewModalOpened] = useState(false)
+  const [viewResource, setViewResource] = useState<{ protocol: string; resource: Resource } | null>(null)
 
   // Fetch HTTP routers
   const { data: httpRouters = [], isLoading: httpLoading } = useQuery({
@@ -91,6 +94,11 @@ export default function Routers() {
       confirmProps: { color: 'red' },
       onConfirm: () => deleteMutation.mutate({ protocol, name: router.name }),
     })
+  }
+
+  const handleView = (protocol: string, router: Resource) => {
+    setViewResource({ protocol, resource: router })
+    setViewModalOpened(true)
   }
 
   // HTTP Router columns
@@ -329,6 +337,7 @@ export default function Routers() {
                 columns={httpColumns}
                 data={httpRouters}
                 isLoading={httpLoading}
+                onView={(router) => handleView('http', router)}
                 onEdit={(router) => navigate(`/routers/http/${router.name}/edit`)}
                 onDelete={(router) => handleDelete('http', router)}
                 getRowKey={(router) => router.name}
@@ -346,6 +355,7 @@ export default function Routers() {
                 columns={tcpColumns}
                 data={tcpRouters}
                 isLoading={tcpLoading}
+                onView={(router) => handleView('tcp', router)}
                 onEdit={(router) => navigate(`/routers/tcp/${router.name}/edit`)}
                 onDelete={(router) => handleDelete('tcp', router)}
                 getRowKey={(router) => router.name}
@@ -363,6 +373,7 @@ export default function Routers() {
                 columns={udpColumns}
                 data={udpRouters}
                 isLoading={udpLoading}
+                onView={(router) => handleView('udp', router)}
                 onEdit={(router) => navigate(`/routers/udp/${router.name}/edit`)}
                 onDelete={(router) => handleDelete('udp', router)}
                 getRowKey={(router) => router.name}
@@ -377,6 +388,17 @@ export default function Routers() {
           </Tabs>
         </Card>
       </Stack>
+
+      {viewResource && (
+        <ResourceViewModal
+          opened={viewModalOpened}
+          onClose={() => setViewModalOpened(false)}
+          protocol={viewResource.protocol as any}
+          type="routers"
+          resourceName={viewResource.resource.name}
+          config={viewResource.resource.config}
+        />
+      )}
     </Container>
   )
 }

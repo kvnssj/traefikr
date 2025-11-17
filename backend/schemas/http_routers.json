@@ -44,6 +44,7 @@
         },
         "options": {
           "title": "TLS Options",
+          "default": "default",
           "type": "string",
           "description": "The name of the TLS options to use for configuring TLS parameters."
         },

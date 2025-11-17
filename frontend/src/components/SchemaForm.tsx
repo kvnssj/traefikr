@@ -16,6 +16,7 @@ import {
   Paper,
   Select,
   Card,
+  Badge,
 } from '@mantine/core'
 import { IconAlertCircle, IconPlus, IconTrash, IconWand } from '@tabler/icons-react'
 import { useQuery } from '@tanstack/react-query'
@@ -33,6 +34,7 @@ export interface SchemaFormProps {
   onChange: (value: Record<string, any>) => void
   disabled?: boolean
   resolvedSchema?: any  // Pre-resolved schema to bypass fetching
+  readonly?: boolean
 }
 
 interface SchemaProperty {
@@ -64,6 +66,7 @@ export function SchemaForm({
   onChange,
   disabled = false,
   resolvedSchema,
+  readonly = false,
 }: SchemaFormProps) {
   const [activeTab, setActiveTab] = useState<string>('general')
   const [ruleBuilderOpened, setRuleBuilderOpened] = useState(false)
@@ -181,12 +184,31 @@ export function SchemaForm({
   }
 
   const renderField = (key: string, prop: SchemaProperty, path: string[], isRequired: boolean): React.ReactNode => {
-    const fieldValue = getFieldValue(path)
+    const fieldValue = getFieldValue(path) || prop.default
     const specialField = isSpecialField(key, prop)
     const label = getFieldLabel(key, prop)
 
+    console.log(key, prop, path, isRequired, specialField, label, fieldValue);
+
     // Special case: middlewares array
     if (specialField === 'middlewares') {
+      if (readonly) {
+        return (
+          <div key={path.join('.')}>
+            <Text size="sm" fw={500}>{label}</Text>
+            {prop.description && <Text size="xs" c="dimmed">{prop.description}</Text>}
+            <Group gap="xs" mt="xs">
+              {(fieldValue || []).length === 0 ? (
+                <Text size="sm" c="dimmed">None</Text>
+              ) : (
+                (fieldValue || []).map((m: string, idx: number) => (
+                  <Badge key={idx} variant="light">{m}</Badge>
+                ))
+              )}
+            </Group>
+          </div>
+        )
+      }
       return (
         <MiddlewareOrderList
           key={path.join('.')}
@@ -202,6 +224,23 @@ export function SchemaForm({
 
     // Special case: entryPoints array
     if (specialField === 'entryPoints') {
+      if (readonly) {
+        return (
+          <div key={path.join('.')}>
+            <Text size="sm" fw={500}>{label}</Text>
+            {prop.description && <Text size="xs" c="dimmed">{prop.description}</Text>}
+            <Group gap="xs" mt="xs">
+              {(fieldValue || []).length === 0 ? (
+                <Text size="sm" c="dimmed">None</Text>
+              ) : (
+                (fieldValue || []).map((ep: string, idx: number) => (
+                  <Badge key={idx} variant="light">{ep}</Badge>
+                ))
+              )}
+            </Group>
+          </div>
+        )
+      }
       return (
         <EntryPointSelector
           key={path.join('.')}
@@ -217,6 +256,15 @@ export function SchemaForm({
 
     // Special case: rule field with builder
     if (specialField === 'rule') {
+      if (readonly) {
+        return (
+          <div key={path.join('.')}>
+            <Text size="sm" fw={500}>{label}</Text>
+            {prop.description && <Text size="xs" c="dimmed">{prop.description}</Text>}
+            <Text size="sm" mt="xs">{fieldValue || '-'}</Text>
+          </div>
+        )
+      }
       return (
         <div key={path.join('.')}>
           <TextInput
@@ -247,6 +295,15 @@ export function SchemaForm({
 
     // Special case: service reference
     if (specialField === 'service') {
+      if (readonly) {
+        return (
+          <div key={path.join('.')}>
+            <Text size="sm" fw={500}>{label}</Text>
+            {prop.description && <Text size="xs" c="dimmed">{prop.description}</Text>}
+            <Text size="sm" mt="xs">{fieldValue || '-'}</Text>
+          </div>
+        )
+      }
       return (
         <ResourceSelector
           key={path.join('.')}
@@ -264,6 +321,15 @@ export function SchemaForm({
 
     // Special case: fallback service reference (for failover)
     if (specialField === 'fallback') {
+      if (readonly) {
+        return (
+          <div key={path.join('.')}>
+            <Text size="sm" fw={500}>{label}</Text>
+            <Text size="xs" c="dimmed">{prop.description || 'Backup service activated when the main service becomes unreachable'}</Text>
+            <Text size="sm" mt="xs">{fieldValue || '-'}</Text>
+          </div>
+        )
+      }
       return (
         <ResourceSelector
           key={path.join('.')}
@@ -291,6 +357,15 @@ export function SchemaForm({
 
     // Special case: TLS options reference
     if (specialField === 'tlsOptions') {
+      if (readonly) {
+        return (
+          <div key={path.join('.')}>
+            <Text size="sm" fw={500}>{label}</Text>
+            {prop.description && <Text size="xs" c="dimmed">{prop.description}</Text>}
+            <Text size="sm" mt="xs">{fieldValue || '-'}</Text>
+          </div>
+        )
+      }
       return (
         <ResourceSelector
           key={path.join('.')}
@@ -308,6 +383,15 @@ export function SchemaForm({
 
     // Special case: certResolver reference (not a resource, but could be handled differently)
     if (specialField === 'certResolver') {
+      if (readonly) {
+        return (
+          <div key={path.join('.')}>
+            <Text size="sm" fw={500}>{label}</Text>
+            <Text size="xs" c="dimmed">{prop.description || 'Name of the certificate resolver (e.g., letsencrypt)'}</Text>
+            <Text size="sm" mt="xs">{fieldValue || '-'}</Text>
+          </div>
+        )
+      }
       return (
         <TextInput
           key={path.join('.')}
@@ -332,6 +416,15 @@ export function SchemaForm({
           label: String(val),
         }))
 
+        if (readonly) {
+          return (
+            <div key={path.join('.')}>
+              <Text size="sm" fw={500}>{label}</Text>
+              {prop.description && <Text size="xs" c="dimmed">{prop.description}</Text>}
+              <Text size="sm" mt="xs">{fieldValue || '-'}</Text>
+            </div>
+          )
+        }
         return (
           <Select
             key={path.join('.')}
@@ -351,6 +444,15 @@ export function SchemaForm({
 
       // Multiline text
       if (prop.format === 'textarea' || (prop.description && prop.description.includes('multiline'))) {
+        if (readonly) {
+          return (
+            <div key={path.join('.')}>
+              <Text size="sm" fw={500}>{label}</Text>
+              {prop.description && <Text size="xs" c="dimmed">{prop.description}</Text>}
+              <Text size="sm" mt="xs" style={{ whiteSpace: 'pre-wrap' }}>{fieldValue || '-'}</Text>
+            </div>
+          )
+        }
         return (
           <Textarea
             key={path.join('.')}
@@ -365,6 +467,15 @@ export function SchemaForm({
         )
       }
 
+      if (readonly) {
+        return (
+          <div key={path.join('.')}>
+            <Text size="sm" fw={500}>{label}</Text>
+            {prop.description && <Text size="xs" c="dimmed">{prop.description}</Text>}
+            <Text size="sm" mt="xs">{fieldValue || '-'}</Text>
+          </div>
+        )
+      }
       return (
         <TextInput
           key={path.join('.')}
@@ -380,6 +491,15 @@ export function SchemaForm({
 
     // Number fields
     if (propTypes.includes('number') || propTypes.includes('integer')) {
+      if (readonly) {
+        return (
+          <div key={path.join('.')}>
+            <Text size="sm" fw={500}>{label}</Text>
+            {prop.description && <Text size="xs" c="dimmed">{prop.description}</Text>}
+            <Text size="sm" mt="xs">{fieldValue ?? '-'}</Text>
+          </div>
+        )
+      }
       return (
         <NumberInput
           key={path.join('.')}
@@ -397,6 +517,17 @@ export function SchemaForm({
 
     // Boolean fields
     if (propTypes.includes('boolean')) {
+      if (readonly) {
+        return (
+          <div key={path.join('.')}>
+            <Text size="sm" fw={500}>{label}</Text>
+            {prop.description && <Text size="xs" c="dimmed">{prop.description}</Text>}
+            <Badge color={fieldValue ? 'green' : 'red'} variant="light" mt="xs">
+              {fieldValue ? 'Enabled' : 'Disabled'}
+            </Badge>
+          </div>
+        )
+      }
       return (
         <Switch
           key={path.join('.')}
@@ -427,12 +558,24 @@ export function SchemaForm({
     // Object fields (empty objects = boolean flags)
     if (propTypes.includes('object') && (!prop.properties || Object.keys(prop.properties).length === 0)) {
       // Empty object means it's a flag - render as checkbox
+      const isChecked = fieldValue != null && typeof fieldValue === 'object'
+      if (readonly) {
+        return (
+          <div key={path.join('.')}>
+            <Text size="sm" fw={500}>{label}</Text>
+            {prop.description && <Text size="xs" c="dimmed">{prop.description}</Text>}
+            <Badge color={isChecked ? 'green' : 'red'} variant="light" mt="xs">
+              {isChecked ? 'Enabled' : 'Disabled'}
+            </Badge>
+          </div>
+        )
+      }
       return (
         <Checkbox
           key={path.join('.')}
           label={label}
           description={prop.description}
-          checked={fieldValue != null && typeof fieldValue === 'object'}
+          checked={isChecked}
           onChange={(e) => {
             // If checked, set to empty object {}; if unchecked, set to undefined
             handleFieldChange(path, e.currentTarget.checked ? {} : undefined)
@@ -464,6 +607,15 @@ export function SchemaForm({
     }
 
     // Fallback to text input
+    if (readonly) {
+      return (
+        <div key={path.join('.')}>
+          <Text size="sm" fw={500}>{label}</Text>
+          {prop.description && <Text size="xs" c="dimmed">{prop.description}</Text>}
+          <Text size="sm" mt="xs">{fieldValue || '-'}</Text>
+        </div>
+      )
+    }
     return (
       <TextInput
         key={path.join('.')}
@@ -487,6 +639,25 @@ export function SchemaForm({
       itemSchema.type === 'object' ||
       (itemSchema.properties && Object.keys(itemSchema.properties).length > 0)
     )
+
+    // Readonly mode for primitive arrays
+    if (readonly && !isObjectArray) {
+      return (
+        <div key={path.join('.')}>
+          <Text size="sm" fw={500}>{label}</Text>
+          {prop.description && <Text size="xs" c="dimmed">{prop.description}</Text>}
+          <Group gap="xs" mt="xs">
+            {fieldValue.length === 0 ? (
+              <Text size="sm" c="dimmed">None</Text>
+            ) : (
+              fieldValue.map((item: any, idx: number) => (
+                <Badge key={idx} variant="light">{item || '-'}</Badge>
+              ))
+            )}
+          </Group>
+        </div>
+      )
+    }
 
     const getDefaultItemValue = () => {
       if (isObjectArray) {
@@ -547,21 +718,23 @@ export function SchemaForm({
               </Text>
             )}
           </div>
-          <Button
-            size="xs"
-            leftSection={<IconPlus size={14} />}
-            onClick={handleAddItem}
-            disabled={disabled}
-          >
-            Add
-          </Button>
+          {!readonly && (
+            <Button
+              size="xs"
+              leftSection={<IconPlus size={14} />}
+              onClick={handleAddItem}
+              disabled={disabled}
+            >
+              Add
+            </Button>
+          )}
         </Group>
 
         <Stack gap="xs">
           {fieldValue.length === 0 ? (
             <Paper p="sm" withBorder style={{ textAlign: 'center' }}>
               <Text size="sm" c="dimmed">
-                No items. Click "Add" to add an item.
+                No items. {(readonly)?'':'Click "Add" to add an item.'}
               </Text>
             </Paper>
           ) : (
@@ -590,16 +763,18 @@ export function SchemaForm({
                           (newValue) => handleItemFieldChange(index, fieldPath, newValue)
                         )
                       })}
-                      <Group justify="flex-end">
-                        <ActionIcon
-                          variant="subtle"
-                          color="red"
-                          onClick={() => handleRemoveItem(index)}
-                          disabled={disabled}
-                        >
-                          <IconTrash size={16} />
-                        </ActionIcon>
-                      </Group>
+                      {!readonly && (
+                        <Group justify="flex-end">
+                          <ActionIcon
+                            variant="subtle"
+                            color="red"
+                            onClick={() => handleRemoveItem(index)}
+                            disabled={disabled}
+                          >
+                            <IconTrash size={16} />
+                          </ActionIcon>
+                        </Group>
+                      )}
                     </>
                   ) : (
                     // Render simple input for primitive types
@@ -610,14 +785,16 @@ export function SchemaForm({
                         disabled={disabled}
                         style={{ flex: 1 }}
                       />
-                      <ActionIcon
-                        variant="subtle"
-                        color="red"
-                        onClick={() => handleRemoveItem(index)}
-                        disabled={disabled}
-                      >
-                        <IconTrash size={16} />
-                      </ActionIcon>
+                      {!readonly && (
+                        <ActionIcon
+                          variant="subtle"
+                          color="red"
+                          onClick={() => handleRemoveItem(index)}
+                          disabled={disabled}
+                        >
+                          <IconTrash size={16} />
+                        </ActionIcon>
+                      )}
                     </Group>
                   )}
                 </Stack>
@@ -635,6 +812,28 @@ export function SchemaForm({
 
     // Convert object to array of key-value pairs for easier manipulation
     const entries = Object.entries(fieldValue)
+
+    // Readonly mode
+    if (readonly) {
+      return (
+        <div key={path.join('.')}>
+          <Text size="sm" fw={500}>{label}</Text>
+          {prop.description && <Text size="xs" c="dimmed">{prop.description}</Text>}
+          <Stack gap="xs" mt="xs">
+            {entries.length === 0 ? (
+              <Text size="sm" c="dimmed">None</Text>
+            ) : (
+              entries.map(([entryKey, entryValue], index) => (
+                <Group key={index} gap="xs">
+                  <Text size="sm" fw={500}>{entryKey}:</Text>
+                  <Text size="sm">{entryValue || '-'}</Text>
+                </Group>
+              ))
+            )}
+          </Stack>
+        </div>
+      )
+    }
 
     const handleAddEntry = () => {
       const newValue = { ...fieldValue, '': '' }
@@ -739,6 +938,25 @@ export function SchemaForm({
     const fieldValue: string[] = getFieldValue(path) || []
     const label = getFieldLabel(key, prop)
 
+    // Readonly mode
+    if (readonly) {
+      return (
+        <div key={path.join('.')}>
+          <Text size="sm" fw={500}>{label}</Text>
+          {prop.description && <Text size="xs" c="dimmed">{prop.description}</Text>}
+          <Group gap="xs" mt="xs">
+            {fieldValue.length === 0 ? (
+              <Text size="sm" c="dimmed">None</Text>
+            ) : (
+              fieldValue.map((item: string, idx: number) => (
+                <Badge key={idx} variant="light">{item || '-'}</Badge>
+              ))
+            )}
+          </Group>
+        </div>
+      )
+    }
+
     const handleAddItem = () => {
       const newValue = [...fieldValue, '']
       handleFieldChange(path, newValue)
@@ -798,14 +1016,16 @@ export function SchemaForm({
                     disabled={disabled}
                   />
                 </div>
-                <ActionIcon
-                  variant="subtle"
-                  color="red"
-                  onClick={() => handleRemoveItem(index)}
-                  disabled={disabled}
-                >
-                  <IconTrash size={16} />
-                </ActionIcon>
+                {!readonly && (
+                  <ActionIcon
+                    variant="subtle"
+                    color="red"
+                    onClick={() => handleRemoveItem(index)}
+                    disabled={disabled}
+                  >
+                    <IconTrash size={16} />
+                  </ActionIcon>
+                )}
               </Group>
             ))
           )}
@@ -861,6 +1081,27 @@ export function SchemaForm({
 
       const handleValueChange = (entryKey: string, newValue: string) => {
         onChange({ ...fieldValue, [entryKey]: newValue })
+      }
+
+      if (readonly) {
+        return (
+          <div key={fieldPath.join('.')}>
+            <Text size="sm" fw={500}>{label}</Text>
+            {prop.description && <Text size="xs" c="dimmed">{prop.description}</Text>}
+            <Stack gap="xs" mt="xs">
+              {entries.length === 0 ? (
+                <Text size="sm" c="dimmed">None</Text>
+              ) : (
+                entries.map(([entryKey, entryValue], index) => (
+                  <Group key={index} gap="xs">
+                    <Text size="sm" fw={500}>{entryKey}:</Text>
+                    <Text size="sm">{entryValue || '-'}</Text>
+                  </Group>
+                ))
+              )}
+            </Stack>
+          </div>
+        )
       }
 
       return (
@@ -937,6 +1178,15 @@ export function SchemaForm({
     // Special case: service name reference in services/mirrors arrays, or failover/mirroring service fields
     if ((key === 'name' || key === 'service' || key === 'fallback') && propTypes.includes('string') && !prop.enum) {
       // This is likely a service reference field
+      if (readonly) {
+        return (
+          <div key={fieldPath.join('.')}>
+            <Text size="sm" fw={500}>{label}</Text>
+            <Text size="xs" c="dimmed">{prop.description || 'Reference to an existing service'}</Text>
+            <Text size="sm" mt="xs">{value || '-'}</Text>
+          </div>
+        )
+      }
       return (
         <ResourceSelector
           key={fieldPath.join('.')}
@@ -960,6 +1210,15 @@ export function SchemaForm({
           label: String(val),
         }))
 
+        if (readonly) {
+          return (
+            <div key={fieldPath.join('.')}>
+              <Text size="sm" fw={500}>{label}</Text>
+              {prop.description && <Text size="xs" c="dimmed">{prop.description}</Text>}
+              <Text size="sm" mt="xs">{value || '-'}</Text>
+            </div>
+          )
+        }
         return (
           <Select
             key={fieldPath.join('.')}
@@ -978,6 +1237,15 @@ export function SchemaForm({
       }
 
       if (prop.format === 'textarea' || (prop.description && prop.description.includes('multiline'))) {
+        if (readonly) {
+          return (
+            <div key={fieldPath.join('.')}>
+              <Text size="sm" fw={500}>{label}</Text>
+              {prop.description && <Text size="xs" c="dimmed">{prop.description}</Text>}
+              <Text size="sm" mt="xs" style={{ whiteSpace: 'pre-wrap' }}>{value || '-'}</Text>
+            </div>
+          )
+        }
         return (
           <Textarea
             key={fieldPath.join('.')}
@@ -992,6 +1260,15 @@ export function SchemaForm({
         )
       }
 
+      if (readonly) {
+        return (
+          <div key={fieldPath.join('.')}>
+            <Text size="sm" fw={500}>{label}</Text>
+            {prop.description && <Text size="xs" c="dimmed">{prop.description}</Text>}
+            <Text size="sm" mt="xs">{value || '-'}</Text>
+          </div>
+        )
+      }
       return (
         <TextInput
           key={fieldPath.join('.')}
@@ -1007,6 +1284,15 @@ export function SchemaForm({
 
     // Number fields
     if (propTypes.includes('number') || propTypes.includes('integer')) {
+      if (readonly) {
+        return (
+          <div key={fieldPath.join('.')}>
+            <Text size="sm" fw={500}>{label}</Text>
+            {prop.description && <Text size="xs" c="dimmed">{prop.description}</Text>}
+            <Text size="sm" mt="xs">{value ?? '-'}</Text>
+          </div>
+        )
+      }
       return (
         <NumberInput
           key={fieldPath.join('.')}
@@ -1024,6 +1310,17 @@ export function SchemaForm({
 
     // Boolean fields
     if (propTypes.includes('boolean')) {
+      if (readonly) {
+        return (
+          <div key={fieldPath.join('.')}>
+            <Text size="sm" fw={500}>{label}</Text>
+            {prop.description && <Text size="xs" c="dimmed">{prop.description}</Text>}
+            <Badge color={value ? 'green' : 'red'} variant="light" mt="xs">
+              {value ? 'Enabled' : 'Disabled'}
+            </Badge>
+          </div>
+        )
+      }
       return (
         <Switch
           key={fieldPath.join('.')}
@@ -1042,6 +1339,24 @@ export function SchemaForm({
       const nestedValue = value || []
       const handleNestedArrayChange = (newArrayValue: any[]) => {
         onChange(newArrayValue)
+      }
+
+      if (readonly) {
+        return (
+          <div key={fieldPath.join('.')}>
+            <Text size="sm" fw={500}>{label}</Text>
+            {prop.description && <Text size="xs" c="dimmed">{prop.description}</Text>}
+            <Group gap="xs" mt="xs">
+              {nestedValue.length === 0 ? (
+                <Text size="sm" c="dimmed">None</Text>
+              ) : (
+                nestedValue.map((item: any, idx: number) => (
+                  <Badge key={idx} variant="light">{item || '-'}</Badge>
+                ))
+              )}
+            </Group>
+          </div>
+        )
       }
 
       return (
@@ -1090,6 +1405,15 @@ export function SchemaForm({
     }
 
     // Fallback to text input
+    if (readonly) {
+      return (
+        <div key={fieldPath.join('.')}>
+          <Text size="sm" fw={500}>{label}</Text>
+          {prop.description && <Text size="xs" c="dimmed">{prop.description}</Text>}
+          <Text size="sm" mt="xs">{value || '-'}</Text>
+        </div>
+      )
+    }
     return (
       <TextInput
         key={fieldPath.join('.')}

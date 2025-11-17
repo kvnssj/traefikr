@@ -12,6 +12,7 @@ interface ServiceSchemaFormProps {
   value: Record<string, any>
   onChange: (value: Record<string, any>) => void
   disabled?: boolean
+  readonly?: boolean
 }
 
 /**
@@ -24,6 +25,7 @@ export function ServiceSchemaForm({
   value,
   onChange,
   disabled = false,
+  readonly = false,
 }: ServiceSchemaFormProps) {
   const { data: fullSchema, isLoading, error } = useQuery({
     queryKey: ['schema', protocol, 'services'],
@@ -82,6 +84,7 @@ export function ServiceSchemaForm({
       value={value}
       onChange={onChange}
       disabled={disabled}
+      readonly={readonly}
       resolvedSchema={subtypeSchema}
     />
   )

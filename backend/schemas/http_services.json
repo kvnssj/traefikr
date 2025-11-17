@@ -51,6 +51,7 @@
       "properties": {
         "path": {
           "title": "Path",
+          "default": "",
           "type": "string",
           "description": "Endpoint for health verification"
         },
@@ -62,12 +63,14 @@
         "mode": {
           "title": "Mode",
           "type": "string",
+          "default": "http",
           "enum": ["grpc", "http"],
           "description": "Health check mode"
         },
         "hostname": {
           "title": "Hostname",
           "type": "string",
+          "default": "",
           "description": "Custom Host header value"
         },
         "port": {
@@ -78,16 +81,19 @@
         "interval": {
           "title": "Interval",
           "type": "string",
+          "default": "30s",
           "description": "Check frequency (default: 30s)"
         },
         "unhealthyInterval": {
           "title": "Unhealthy Interval",
           "type": "string",
+          "default": "30s",
           "description": "Failed server check rate"
         },
         "timeout": {
           "title": "Timeout",
           "type": "string",
+          "default": "5s",
           "description": "Maximum wait duration (default: 5s)"
         },
         "headers": {
@@ -101,11 +107,13 @@
         "followRedirects": {
           "title": "Follow Redirects",
           "type": "boolean",
+          "default": true,
           "description": "Follow redirects (default: true)"
         },
         "method": {
           "title": "Method",
           "type": "string",
+          "default": "GET",
           "description": "HTTP verb (default: GET)"
         },
         "status": {
@@ -128,11 +136,13 @@
         "failureWindow": {
           "title": "Failure Window",
           "type": "string",
+          "default": "10s",
           "description": "Time window for failure assessment (default: 10s)"
         },
         "maxFailedAttempts": {
           "title": "Max Failed Attempts",
           "type": "integer",
+          "default": 1,
           "description": "Consecutive failures threshold (default: 1)"
         }
       },
@@ -197,6 +207,7 @@
             "serversTransport": {
               "title": "Servers Transport",
               "type": "string",
+              "default": "default@internal",
               "description": "Reference to an HTTP ServersTransport configuration for the communication between Traefik and your servers"
             },
             "responseForwarding": {

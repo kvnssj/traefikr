@@ -22,14 +22,17 @@ import { notifications } from '@mantine/notifications'
 import { resourcesApi, Resource } from '@/lib/api'
 import { ProviderIcon } from '@/components/ProviderIcon'
 import { StatusIcon } from '@/components/StatusIcon'
+import { ResourceViewModal } from '@/components/ResourceViewModal'
 import { Network as Server, Trash2, Edit, Plus, Search } from 'lucide-react'
-import { IconRouter, IconNetwork, IconWifi, IconInfoCircle } from '@tabler/icons-react'
+import { IconRouter, IconNetwork, IconWifi, IconInfoCircle, IconEye } from '@tabler/icons-react'
 
 export default function Services() {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<string>('http')
   const [searchQuery, setSearchQuery] = useState('')
+  const [viewModalOpened, setViewModalOpened] = useState(false)
+  const [viewResource, setViewResource] = useState<{ protocol: string; resource: Resource } | null>(null)
 
   // Fetch HTTP services
   const { data: httpServices = [], isLoading: httpLoading } = useQuery({
@@ -101,6 +104,11 @@ export default function Services() {
       confirmProps: { color: 'red' },
       onConfirm: () => deleteMutation.mutate({ protocol, name: service.name }),
     })
+  }
+
+  const handleView = (protocol: string, service: Resource) => {
+    setViewResource({ protocol, resource: service })
+    setViewModalOpened(true)
   }
 
   const filterServices = (services: Resource[]) => {
@@ -189,6 +197,14 @@ export default function Services() {
               disabledLabel="Disabled"
             />
             <Group gap="xs">
+              <ActionIcon
+                variant="subtle"
+                color="blue"
+                onClick={() => handleView(protocol, service)}
+                title="View service"
+              >
+                <IconEye size={16} />
+              </ActionIcon>
               <ActionIcon
                 variant="subtle"
                 color={canEdit ? 'blue' : 'gray'}
@@ -311,6 +327,17 @@ export default function Services() {
           </Stack>
         </Card>
       </Stack>
+
+      {viewResource && (
+        <ResourceViewModal
+          opened={viewModalOpened}
+          onClose={() => setViewModalOpened(false)}
+          protocol={viewResource.protocol as any}
+          type="services"
+          resourceName={viewResource.resource.name}
+          config={viewResource.resource.config}
+        />
+      )}
     </Container>
   )
 }

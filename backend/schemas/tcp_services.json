@@ -13,26 +13,31 @@
         "send": {
           "title": "Send",
           "type": "string",
+          "default": "",
           "description": "Payload to send during the health check"
         },
         "expect": {
           "title": "Expect",
           "type": "string",
+          "default": "",
           "description": "Expected response payload from the server"
         },
         "interval": {
           "title": "Interval",
           "type": "string",
+          "default": "30s",
           "description": "Frequency of health checks for healthy targets (default: 30s)"
         },
         "unhealthyInterval": {
           "title": "Unhealthy Interval",
           "type": "string",
+          "default": "30s",
           "description": "Frequency of health checks for unhealthy targets (default: 30s)"
         },
         "timeout": {
           "title": "Timeout",
           "type": "string",
+          "default": "5s",
           "description": "Maximum wait duration for health check response (default: 5s)"
         }
       },

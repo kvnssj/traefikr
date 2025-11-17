@@ -8,6 +8,7 @@
         "depth": {
           "title": "Depth",
           "type": "integer",
+          "default": 0,
           "description": "Depth position of the IP to select in the X-Forwarded-For header (starting from the right)"
         },
         "excludedIPs": {
@@ -35,16 +36,19 @@
         "ca": {
           "title": "CA Certificate",
           "type": "string",
+          "default": "",
           "description": "Certificate authority path"
         },
         "cert": {
           "title": "Client Certificate",
           "type": "string",
+          "default": "",
           "description": "Client certificate path"
         },
         "key": {
           "title": "Private Key",
           "type": "string",
+          "default": "",
           "description": "Private key path"
         },
         "insecureSkipVerify": {
@@ -66,6 +70,7 @@
         "prefix": {
           "title": "Prefix",
           "type": "string",
+          "default": "",
           "description": "Text prepended to the current request path"
         }
       },
@@ -80,6 +85,7 @@
         "users": {
           "title": "Users",
           "type": "array",
+          "default": [],
           "items": {
             "type": "string"
           },
@@ -88,6 +94,7 @@
         "usersFile": {
           "title": "Users File",
           "type": "string",
+          "default": "",
           "description": "Path to external file containing name:hashed-password entries"
         },
         "realm": {
@@ -99,6 +106,7 @@
         "headerField": {
           "title": "Header Field",
           "type": "string",
+          "default": "",
           "description": "Header field to store the authenticated user"
         },
         "removeHeader": {
@@ -118,6 +126,7 @@
         "maxRequestBodyBytes": {
           "title": "Max Request Body Bytes",
           "type": "integer",
+          "default": 0,
           "description": "Maximum allowed body size for the request (in bytes)"
         },
         "memRequestBodyBytes": {
@@ -129,6 +138,7 @@
         "maxResponseBodyBytes": {
           "title": "Max Response Body Bytes",
           "type": "integer",
+          "default": 0,
           "description": "Maximum allowed response size from the Service (in bytes)"
         },
         "memResponseBodyBytes": {
@@ -140,6 +150,7 @@
         "retryExpression": {
           "title": "Retry Expression",
           "type": "string",
+          "default": "",
           "description": "Logical expression for request replay"
         }
       },
@@ -153,6 +164,7 @@
         "middlewares": {
           "title": "Middlewares",
           "type": "array",
+          "default": [],
           "items": {
             "type": "string"
           },
@@ -170,7 +182,7 @@
         "expression": {
           "title": "Expression",
           "type": "string",
-          "default": "LatencyAtQuantileMS(50.0) > 100",
+          "default": "100ms",
           "description": "Condition determining when to activate fallback mechanism"
         },
         "checkPeriod": {
@@ -208,6 +220,7 @@
         "excludedContentTypes": {
           "title": "Excluded Content Types",
           "type": "array",
+          "default": [],
           "items": {
             "type": "string"
           },
@@ -216,11 +229,13 @@
         "defaultEncoding": {
           "title": "Default Encoding",
           "type": "string",
+          "default": "",
           "description": "Fallback encoding when Accept-Encoding header absent"
         },
         "encodings": {
           "title": "Encodings",
           "type": "array",
+          "default": ["gzip", "br", "zstd"],
           "items": {
             "type": "string"
           },
@@ -229,6 +244,7 @@
         "includedContentTypes": {
           "title": "Included Content Types",
           "type": "array",
+          "default": [],
           "items": {
             "type": "string"
           },
@@ -247,6 +263,7 @@
     "contentType": {
       "title": "Content Type",
       "type": "object",
+      "default": {},
       "additionalProperties": false,
       "description": "Handles Content-Type auto-detection"
     },
@@ -257,6 +274,7 @@
         "users": {
           "title": "Users",
           "type": "array",
+          "default": [],
           "items": {
             "type": "string"
           },
@@ -264,6 +282,7 @@
         },
         "usersFile": {
           "title": "Users File",
+          "default": "",
           "type": "string",
           "description": "Path to external file containing authorized users"
         },
@@ -275,6 +294,7 @@
         },
         "headerField": {
           "title": "Header Field",
+          "default": "",
           "type": "string",
           "description": "Header field name for storing authenticated user information"
         },
@@ -295,6 +315,7 @@
         "status": {
           "title": "Status",
           "type": "array",
+          "default": [],
           "items": {
             "type": "string"
           },
@@ -303,6 +324,7 @@
         "statusRewrites": {
           "title": "Status Rewrites",
           "type": "object",
+          "default": {},
           "additionalProperties": {
             "type": "string"
           },
@@ -310,12 +332,14 @@
         },
         "service": {
           "title": "Service",
+          "default": "",
           "type": "string",
           "description": "The service that will serve the new requested error page"
         },
         "query": {
           "title": "Query",
           "type": "string",
+          "default": "",
           "description": "The URL for the error page"
         }
       },
@@ -328,6 +352,7 @@
       "properties": {
         "address": {
           "title": "Address",
+          "default": "",
           "type": "string",
           "description": "Authentication server address"
         },
@@ -340,6 +365,7 @@
         "authResponseHeaders": {
           "title": "Auth Response Headers",
           "type": "array",
+          "default": [],
           "items": {
             "type": "string"
           },
@@ -347,12 +373,14 @@
         },
         "authResponseHeadersRegex": {
           "title": "Auth Response Headers Regex",
+          "default": "",
           "type": "string",
           "description": "Regex pattern to match response headers"
         },
         "authRequestHeaders": {
           "title": "Auth Request Headers",
           "type": "array",
+          "default": [],
           "items": {
             "type": "string"
           },
@@ -361,6 +389,7 @@
         "addAuthCookiesToResponse": {
           "title": "Add Auth Cookies To Response",
           "type": "array",
+          "default": [],
           "items": {
             "type": "string"
           },
@@ -381,6 +410,7 @@
         "headerField": {
           "title": "Header Field",
           "type": "string",
+          "default": "",
           "description": "Header field for authenticated user"
         },
         "preserveLocationHeader": {
@@ -410,6 +440,7 @@
         "allowOrigins": {
           "title": "Allow Origins",
           "type": "array",
+          "default": [],
           "items": {
             "type": "string"
           },
@@ -488,6 +519,7 @@
         "accessControlMaxAge": {
           "title": "Access Control Max Age",
           "type": "integer",
+          "default": 0,
           "description": "Preflight request cache time (seconds)"
         },
         "addVaryHeader": {
@@ -552,6 +584,7 @@
         "customFrameOptionsValue": {
           "title": "Custom Frame Options Value",
           "type": "string",
+          "default": "",
           "description": "Custom X-Frame-Options value"
         },
         "contentTypeNosniff": {
@@ -579,21 +612,25 @@
         "contentSecurityPolicyReportOnly": {
           "title": "Content Security Policy Report Only",
           "type": "string",
+          "default": "",
           "description": "CSP-Report-Only header value"
         },
         "publicKey": {
           "title": "Public Key",
           "type": "string",
+          "default": "",
           "description": "HPKP certificate pinning"
         },
         "referrerPolicy": {
           "title": "Referrer Policy",
           "type": "string",
+          "default": "",
           "description": "Referer header control"
         },
         "permissionsPolicy": {
           "title": "Permissions Policy",
           "type": "string",
+          "default": "",
           "description": "Browser features control"
         },
         "isDevelopment": {
@@ -633,6 +670,7 @@
         "amount": {
           "title": "Amount",
           "type": "integer",
+          "default": 0,
           "description": "Maximum simultaneous in-flight requests allowed"
         },
         "sourceCriterion": {
@@ -642,11 +680,13 @@
             "requestHost": {
               "title": "Request Host",
               "type": "boolean",
+              "default": false,
               "description": "Uses the request host as the source identifier"
             },
             "requestHeaderName": {
               "title": "Request Header Name",
               "type": "string",
+              "default": "",
               "description": "Groups by a specified custom header name"
             },
             "ipStrategy": {
@@ -742,6 +782,7 @@
         "average": {
           "title": "Average",
           "type": "integer",
+          "default": 0,
           "description": "Number of requests used to define the rate"
         },
         "period": {
@@ -763,11 +804,13 @@
             "requestHost": {
               "title": "Request Host",
               "type": "boolean",
+              "default": false,
               "description": "Groups requests by host header"
             },
             "requestHeaderName": {
               "title": "Request Header Name",
               "type": "string",
+              "default": "",
               "description": "Custom header name for grouping requests"
             },
             "ipStrategy": {
@@ -783,6 +826,7 @@
             "endpoints": {
               "title": "Endpoints",
               "type": "array",
+              "default": ["127.0.0.1:6379"],
               "items": {
                 "type": "string"
               },
@@ -791,11 +835,13 @@
             "username": {
               "title": "Username",
               "type": "string",
+              "default": "",
               "description": "Authentication username"
             },
             "password": {
               "title": "Password",
               "type": "string",
+              "default": "",
               "description": "Authentication password"
             },
             "db": {
@@ -807,16 +853,19 @@
             "poolSize": {
               "title": "Pool Size",
               "type": "integer",
+              "default": 0,
               "description": "Base socket connections in pool"
             },
             "minIdleConns": {
               "title": "Min Idle Connections",
               "type": "integer",
+              "default": 0,
               "description": "Minimum idle connections maintained"
             },
             "maxActiveConns": {
               "title": "Max Active Connections",
               "type": "integer",
+              "default": 0,
               "description": "Maximum concurrent connections"
             },
             "readTimeout": {
@@ -854,6 +903,7 @@
         "scheme": {
           "title": "Scheme",
           "type": "string",
+          "default": "",
           "description": "Scheme of the new URL"
         },
         "permanent": {
@@ -865,6 +915,7 @@
         "port": {
           "title": "Port",
           "type": "string",
+          "default": "",
           "description": "Port of the new URL"
         }
       },
@@ -879,11 +930,13 @@
         "regex": {
           "title": "Regex",
           "type": "string",
+          "default": "",
           "description": "Regular expression to match and capture elements from the request URL"
         },
         "replacement": {
           "title": "Replacement",
           "type": "string",
+          "default": "",
           "description": "Defines how to modify the URL for the new target"
         },
         "permanent": {
@@ -942,6 +995,7 @@
         "initialInterval": {
           "title": "Initial Interval",
           "type": "string",
+          "default": 0,
           "description": "Initial wait duration for exponential backoff"
         }
       },
@@ -956,6 +1010,7 @@
         "prefixes": {
           "title": "Prefixes",
           "type": "array",
+          "default": [],
           "items": {
             "type": "string"
           },
@@ -972,6 +1027,7 @@
         "regex": {
           "title": "Regex",
           "type": "array",
+          "default": [],
           "items": {
             "type": "string"
           },
