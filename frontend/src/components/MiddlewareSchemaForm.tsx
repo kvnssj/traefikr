@@ -12,6 +12,7 @@ interface MiddlewareSchemaFormProps {
   value: Record<string, any>
   onChange: (value: Record<string, any>) => void
   disabled?: boolean
+  readonly?: boolean
 }
 
 /**
@@ -24,6 +25,7 @@ export function MiddlewareSchemaForm({
   value,
   onChange,
   disabled = false,
+  readonly = false,
 }: MiddlewareSchemaFormProps) {
   const { data: fullSchema, isLoading, error } = useQuery({
     queryKey: ['schema', protocol, 'middlewares'],
@@ -88,6 +90,7 @@ export function MiddlewareSchemaForm({
       value={value}
       onChange={onChange}
       disabled={disabled}
+      readonly={readonly}
       resolvedSchema={middlewareSchema}
     />
   )

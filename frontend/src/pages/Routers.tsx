@@ -347,6 +347,7 @@ export default function Routers() {
                 enableStatusFilter
                 searchPlaceholder="Search HTTP routers..."
                 emptyMessage="No HTTP routers found"
+                defaultSort={{ key: 'name', direction: 'asc' }}
               />
             </Tabs.Panel>
 
@@ -365,6 +366,7 @@ export default function Routers() {
                 enableStatusFilter
                 searchPlaceholder="Search TCP routers..."
                 emptyMessage="No TCP routers found"
+                defaultSort={{ key: 'name', direction: 'asc' }}
               />
             </Tabs.Panel>
 
@@ -383,6 +385,7 @@ export default function Routers() {
                 enableStatusFilter
                 searchPlaceholder="Search UDP routers..."
                 emptyMessage="No UDP routers found"
+                defaultSort={{ key: 'name', direction: 'asc' }}
               />
             </Tabs.Panel>
           </Tabs>

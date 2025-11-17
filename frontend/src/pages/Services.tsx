@@ -15,7 +15,7 @@ import {
   Container,
   Tabs,
   TextInput,
-  Alert,
+  Tooltip,
 } from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
@@ -24,7 +24,7 @@ import { ProviderIcon } from '@/components/ProviderIcon'
 import { StatusIcon } from '@/components/StatusIcon'
 import { ResourceViewModal } from '@/components/ResourceViewModal'
 import { Network as Server, Trash2, Edit, Plus, Search } from 'lucide-react'
-import { IconRouter, IconNetwork, IconWifi, IconInfoCircle, IconEye } from '@tabler/icons-react'
+import { IconRouter, IconNetwork, IconWifi, IconEye, IconLock, IconCloud } from '@tabler/icons-react'
 
 export default function Services() {
   const queryClient = useQueryClient()
@@ -112,85 +112,299 @@ export default function Services() {
   }
 
   const filterServices = (services: Resource[]) => {
-    if (!searchQuery) return services
-    return services.filter(
-      (service) =>
-        service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        service.provider.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+    let filtered = services
+    if (searchQuery) {
+      filtered = filtered.filter(
+        (service) =>
+          service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          service.provider.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    }
+    // Sort by name ascending
+    return [...filtered].sort((a, b) => a.name.localeCompare(b.name))
   }
 
   const renderServiceCard = (protocol: string, service: Resource) => {
     const canEdit = service.source === 'database'
+    const isInternal = service.provider === 'internal'
+    const isExternal = service.source !== 'database' && !isInternal
 
-    // Get servers from either Traefik-sourced (direct properties) or database (config property)
+    // Get service type and data from either Traefik-sourced (direct properties) or database (config property)
     const serviceObj = service as any
     const loadBalancer = serviceObj.loadBalancer || service.config?.loadBalancer
     const weighted = serviceObj.weighted || service.config?.weighted
-    const servers = loadBalancer?.servers || weighted?.services || []
+    const mirroring = serviceObj.mirroring || service.config?.mirroring
+    const failover = serviceObj.failover || service.config?.failover
+
+    // Determine service type
+    let serviceType = 'loadBalancer'
+    let displayData: any = null
+
+    if (loadBalancer) {
+      serviceType = 'loadBalancer'
+      displayData = loadBalancer.servers || []
+    } else if (weighted) {
+      serviceType = 'weighted'
+      displayData = weighted.services || []
+    } else if (mirroring) {
+      serviceType = 'mirroring'
+      displayData = mirroring
+    } else if (failover) {
+      serviceType = 'failover'
+      displayData = failover
+    }
 
     return (
-      <Card key={service.name} withBorder>
+      <Card key={service.name} withBorder style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <Card.Section withBorder inheritPadding py="md">
           <Group justify="space-between" align="center">
             <Group gap="xs">
               <Server size={20} color="gray" />
               <Title order={4}>{service.name.split('@')[0]}</Title>
+              {/* Provider type indicators */}
+              {isInternal && (
+                <Tooltip label="Internal resource managed automatically by Traefik. Cannot be modified or deleted." multiline w={250}>
+                  <IconLock size={16} color="var(--mantine-color-blue-6)" style={{ cursor: 'help' }} />
+                </Tooltip>
+              )}
+              {isExternal && (
+                <Tooltip label={`Managed by the ${service.provider} provider. Modifications must be made through the provider's configuration.`} multiline w={250}>
+                  <IconCloud size={16} color="var(--mantine-color-gray-6)" style={{ cursor: 'help' }} />
+                </Tooltip>
+              )}
             </Group>
             <ProviderIcon provider={service.provider} />
           </Group>
         </Card.Section>
 
-        <Stack gap="md" mt="md">
-          {/* Internal service note */}
-          {service.provider === 'internal' && (
-            <Alert icon={<IconInfoCircle size={16} />} color="blue" variant="light">
-              <Text size="xs">Internal resource managed automatically by Traefik. Cannot be modified or deleted.</Text>
-            </Alert>
+        {/* Content area - grows to fill space */}
+        <Card.Section inheritPadding py="md" style={{ flex: 1 }}>
+          {serviceType === 'loadBalancer' && displayData && displayData.length > 0 && (
+            <Stack gap="xs">
+              <Stack gap={4}>
+                <Text size="xs" fw={500} c="dimmed">
+                  Type
+                </Text>
+                <Badge variant="light" size="sm" color="blue">
+                  Load Balancer
+                </Badge>
+              </Stack>
+              <Stack gap={4}>
+                <Text size="xs" fw={500} c="dimmed">
+                  Servers
+                </Text>
+                <Stack gap="xs">
+                  {displayData.slice(0, 3).map((server: any, idx: number) => (
+                    <Text
+                      key={idx}
+                      component="code"
+                      size="xs"
+                      c="dimmed"
+                      style={{
+                        backgroundColor: 'var(--mantine-color-gray-1)',
+                        padding: '6px 8px',
+                        borderRadius: '4px',
+                        display: 'block',
+                      }}
+                    >
+                      {server.url || server.address || server.name}
+                    </Text>
+                  ))}
+                  {displayData.length > 3 && (
+                    <Text size="xs" c="dimmed">
+                      ... and {displayData.length - 3} more
+                    </Text>
+                  )}
+                </Stack>
+              </Stack>
+            </Stack>
           )}
 
-          {/* External provider note */}
-          {service.source !== 'database' && service.provider !== 'internal' && (
-            <Alert icon={<IconInfoCircle size={16} />} color="gray" variant="light">
-              <Text size="xs">
-                Managed by the <strong>{service.provider}</strong> provider. Modifications must be made through the provider's configuration.
-              </Text>
-            </Alert>
+          {serviceType === 'weighted' && displayData && displayData.length > 0 && (
+            <Stack gap="xs">
+              <Stack gap={4}>
+                <Text size="xs" fw={500} c="dimmed">
+                  Type
+                </Text>
+                <Badge variant="light" size="sm" color="grape">
+                  Weighted Round Robin
+                </Badge>
+              </Stack>
+              <Stack gap={4}>
+                <Text size="xs" fw={500} c="dimmed">
+                  Services
+                </Text>
+                <Stack gap="xs">
+                  {displayData.slice(0, 3).map((item: any, idx: number) => (
+                    <Group
+                      key={idx}
+                      gap="xs"
+                      wrap="nowrap"
+                      style={{
+                        backgroundColor: 'var(--mantine-color-gray-1)',
+                        padding: '6px 8px',
+                        borderRadius: '4px',
+                      }}
+                    >
+                      <Text
+                        component="code"
+                        size="xs"
+                        c="dimmed"
+                        style={{ flex: 1 }}
+                      >
+                        {item.name}
+                      </Text>
+                      {item.weight && (
+                        <Badge size="xs" variant="filled">
+                          {item.weight}
+                        </Badge>
+                      )}
+                    </Group>
+                  ))}
+                  {displayData.length > 3 && (
+                    <Text size="xs" c="dimmed">
+                      ... and {displayData.length - 3} more
+                    </Text>
+                  )}
+                </Stack>
+              </Stack>
+            </Stack>
           )}
 
-          {/* Servers */}
-          {servers.length > 0 && (
-            <div>
-              <Text size="xs" c="dimmed" mb="xs">
-                {protocol === 'http' ? 'Load Balancer Servers' : 'Servers'}
-              </Text>
+          {serviceType === 'mirroring' && displayData && (
+            <Stack gap="xs">
+              <Stack gap={4}>
+                <Text size="xs" fw={500} c="dimmed">
+                  Type
+                </Text>
+                <Badge variant="light" size="sm" color="cyan">
+                  Mirroring
+                </Badge>
+              </Stack>
               <Stack gap="xs">
-                {servers.slice(0, 3).map((server: any, idx: number) => (
-                  <Text
-                    key={idx}
-                    component="code"
-                    size="xs"
-                    c="dimmed"
-                    style={{
-                      backgroundColor: 'var(--mantine-color-gray-1)',
-                      padding: '2px 6px',
-                      borderRadius: '4px',
-                    }}
-                  >
-                    {server.url || server.address || server.name}
-                  </Text>
-                ))}
-                {servers.length > 3 && (
-                  <Text size="xs" c="dimmed">
-                    ... and {servers.length - 3} more
-                  </Text>
+                {displayData.service && (
+                  <Stack gap={4}>
+                    <Text size="xs" fw={500} c="dimmed">
+                      Main Service
+                    </Text>
+                    <Text
+                      component="code"
+                      size="xs"
+                      c="dimmed"
+                      style={{
+                        backgroundColor: 'var(--mantine-color-gray-1)',
+                        padding: '6px 8px',
+                        borderRadius: '4px',
+                        display: 'block',
+                      }}
+                    >
+                      {displayData.service}
+                    </Text>
+                  </Stack>
+                )}
+                {displayData.mirrors && displayData.mirrors.length > 0 && (
+                  <Stack gap={4}>
+                    <Text size="xs" fw={500} c="dimmed">
+                      Mirror Services
+                    </Text>
+                    <Stack gap="xs">
+                      {displayData.mirrors.slice(0, 2).map((mirror: any, idx: number) => (
+                        <Group
+                          key={idx}
+                          gap="xs"
+                          wrap="nowrap"
+                          style={{
+                            backgroundColor: 'var(--mantine-color-gray-1)',
+                            padding: '6px 8px',
+                            borderRadius: '4px',
+                          }}
+                        >
+                          <Text
+                            component="code"
+                            size="xs"
+                            c="dimmed"
+                            style={{ flex: 1 }}
+                          >
+                            {mirror.name}
+                          </Text>
+                          {mirror.percent && (
+                            <Badge size="xs" variant="filled">
+                              {mirror.percent}%
+                            </Badge>
+                          )}
+                        </Group>
+                      ))}
+                      {displayData.mirrors.length > 2 && (
+                        <Text size="xs" c="dimmed">
+                          ... and {displayData.mirrors.length - 2} more
+                        </Text>
+                      )}
+                    </Stack>
+                  </Stack>
                 )}
               </Stack>
-            </div>
+            </Stack>
           )}
 
-          {/* Status and Actions */}
-          <Group justify="space-between" pt="md" style={{ borderTop: '1px solid var(--mantine-color-gray-3)' }}>
+          {serviceType === 'failover' && displayData && (
+            <Stack gap="xs">
+              <Stack gap={4}>
+                <Text size="xs" fw={500} c="dimmed">
+                  Type
+                </Text>
+                <Badge variant="light" size="sm" color="orange">
+                  Failover
+                </Badge>
+              </Stack>
+              <Stack gap="xs">
+                {displayData.service && (
+                  <Stack gap={4}>
+                    <Text size="xs" fw={500} c="dimmed">
+                      Primary Service
+                    </Text>
+                    <Text
+                      component="code"
+                      size="xs"
+                      c="dimmed"
+                      style={{
+                        backgroundColor: 'var(--mantine-color-gray-1)',
+                        padding: '6px 8px',
+                        borderRadius: '4px',
+                        display: 'block',
+                      }}
+                    >
+                      {displayData.service}
+                    </Text>
+                  </Stack>
+                )}
+                {displayData.fallback && (
+                  <Stack gap={4}>
+                    <Text size="xs" fw={500} c="dimmed">
+                      Fallback Service
+                    </Text>
+                    <Text
+                      component="code"
+                      size="xs"
+                      c="dimmed"
+                      style={{
+                        backgroundColor: 'var(--mantine-color-gray-1)',
+                        padding: '6px 8px',
+                        borderRadius: '4px',
+                        display: 'block',
+                      }}
+                    >
+                      {displayData.fallback}
+                    </Text>
+                  </Stack>
+                )}
+              </Stack>
+            </Stack>
+          )}
+        </Card.Section>
+
+        {/* Actions - fixed at bottom */}
+        <Card.Section withBorder inheritPadding py="sm">
+          <Group justify="space-between">
             <StatusIcon
               enabled={service.enabled}
               enabledLabel="Enabled"
@@ -225,7 +439,7 @@ export default function Services() {
               </ActionIcon>
             </Group>
           </Group>
-        </Stack>
+        </Card.Section>
       </Card>
     )
   }

@@ -43,6 +43,10 @@ export interface DataTableProps<T = any> {
   enableStatusFilter?: boolean
   searchPlaceholder?: string
   emptyMessage?: string
+  defaultSort?: {
+    key: string
+    direction: 'asc' | 'desc'
+  }
 }
 
 export function DataTable<T extends Record<string, any>>({
@@ -60,12 +64,13 @@ export function DataTable<T extends Record<string, any>>({
   enableStatusFilter = false,
   searchPlaceholder = 'Search...',
   emptyMessage = 'No data found',
+  defaultSort,
 }: DataTableProps<T>) {
   const [search, setSearch] = useState('')
   const [sortConfig, setSortConfig] = useState<{
     key: string
     direction: 'asc' | 'desc'
-  } | null>(null)
+  } | null>(defaultSort || null)
   const [showDatabaseOnly, setShowDatabaseOnly] = useState(false)
   const [showEnabledOnly, setShowEnabledOnly] = useState(false)
 

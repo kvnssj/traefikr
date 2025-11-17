@@ -18,7 +18,7 @@ import {
   Paper,
   Tabs,
   TextInput,
-  Alert,
+  Tooltip,
 } from '@mantine/core'
 import {
   IconShield,
@@ -28,13 +28,16 @@ import {
   IconSearch,
   IconRouter,
   IconNetwork,
-  IconInfoCircle,
+  IconLock,
+  IconCloud,
+  IconEye,
 } from '@tabler/icons-react'
 import { resourcesApi, Resource } from '@/lib/api'
 import { notifications } from '@mantine/notifications'
 import { modals } from '@mantine/modals'
 import { ProviderIcon } from '@/components/ProviderIcon'
 import { StatusIcon } from '@/components/StatusIcon'
+import { ResourceViewModal } from '@/components/ResourceViewModal'
 
 // Get middleware type - either from 'type' field (Traefik) or detect from config keys (database)
 function getMiddlewareType(middleware: Resource): string {
@@ -79,6 +82,8 @@ export default function Middlewares() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<string>('http')
   const [searchQuery, setSearchQuery] = useState('')
+  const [viewModalOpened, setViewModalOpened] = useState(false)
+  const [viewResource, setViewResource] = useState<{ protocol: string; resource: Resource } | null>(null)
 
   // Fetch HTTP middlewares
   const { data: httpMiddlewares = [], isLoading: httpLoading } = useQuery({
@@ -144,41 +149,99 @@ export default function Middlewares() {
     })
   }
 
+  const handleView = (protocol: string, middleware: Resource) => {
+    setViewResource({ protocol, resource: middleware })
+    setViewModalOpened(true)
+  }
+
   const filterMiddlewares = (middlewares: Resource[]) => {
-    if (!searchQuery) return middlewares
-    return middlewares.filter((middleware) =>
-      middleware.name.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+    let filtered = middlewares
+    if (searchQuery) {
+      filtered = filtered.filter((middleware) =>
+        middleware.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    }
+    // Sort by name ascending
+    return [...filtered].sort((a, b) => a.name.localeCompare(b.name))
   }
 
   const renderMiddlewareCard = (protocol: string, middleware: Resource) => {
     const canEdit = middleware.source === 'database'
+    const isInternal = middleware.provider === 'internal'
+    const isExternal = middleware.source !== 'database' && !isInternal
     const middlewareType = getMiddlewareType(middleware)
     const middlewareConfig = getMiddlewareConfig(middleware)
 
     return (
-      <Card key={middleware.name} shadow="sm" radius="md" withBorder>
-        <Card.Section p="lg" pb="xs">
-          <Group justify="space-between" align="flex-start">
-            <Group>
-              <ThemeIcon size="lg" radius="md" color="cyan" variant="light">
-                <IconShield size={20} stroke={1.5} />
-              </ThemeIcon>
-              <div>
-                <Text fw={600}>{middleware.name.split('@')[0]}</Text>
-                <Group gap="xs" mt={4}>
-                  <Badge size="sm" variant="light" color="cyan">
-                    {middlewareType}
-                  </Badge>
-                  <ProviderIcon provider={middleware.provider} />
-                </Group>
-              </div>
+      <Card key={middleware.name} withBorder style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        {/* Header */}
+        <Card.Section withBorder inheritPadding py="md">
+          <Group justify="space-between" align="center">
+            <Group gap="xs">
+              <IconShield size={20} color="gray" />
+              <Text fw={600}>{middleware.name.split('@')[0]}</Text>
+              {/* Provider type indicators */}
+              {isInternal && (
+                <Tooltip label="Internal resource managed automatically by Traefik. Cannot be modified or deleted." multiline w={250}>
+                  <IconLock size={16} color="var(--mantine-color-blue-6)" style={{ cursor: 'help' }} />
+                </Tooltip>
+              )}
+              {isExternal && (
+                <Tooltip label={`Managed by the ${middleware.provider} provider. Modifications must be made through the provider's configuration.`} multiline w={250}>
+                  <IconCloud size={16} color="var(--mantine-color-gray-6)" style={{ cursor: 'help' }} />
+                </Tooltip>
+              )}
             </Group>
+            <ProviderIcon provider={middleware.provider} />
+          </Group>
+        </Card.Section>
 
-            <Group gap={4}>
+        {/* Content - grows to fill space */}
+        <Card.Section inheritPadding py="md" style={{ flex: 1 }}>
+          <Stack gap="xs">
+            {/* Type */}
+            <Stack gap={4}>
+              <Text size="xs" fw={500} c="dimmed">
+                Type
+              </Text>
+              <Badge variant="light" size="sm" color="cyan">
+                {middlewareType}
+              </Badge>
+            </Stack>
+
+            {/* Configuration */}
+            <Stack gap={4}>
+              <Text size="xs" fw={500} c="dimmed">
+                Configuration
+              </Text>
+              <Paper p="sm" radius="sm" bg="gray.0">
+                <Code block style={{ maxHeight: '150px', overflow: 'auto' }}>
+                  {JSON.stringify(middlewareConfig, null, 2)}
+                </Code>
+              </Paper>
+            </Stack>
+          </Stack>
+        </Card.Section>
+
+        {/* Actions - fixed at bottom */}
+        <Card.Section withBorder inheritPadding py="sm">
+          <Group justify="space-between">
+            <StatusIcon
+              enabled={middleware.enabled}
+              enabledLabel="Enabled"
+              disabledLabel="Disabled"
+            />
+            <Group gap="xs">
               <ActionIcon
                 variant="subtle"
-                size="sm"
+                color="blue"
+                onClick={() => handleView(protocol, middleware)}
+                title="View middleware"
+              >
+                <IconEye size={16} />
+              </ActionIcon>
+              <ActionIcon
+                variant="subtle"
                 color={canEdit ? 'blue' : 'gray'}
                 onClick={() => canEdit && handleEdit(protocol, middleware)}
                 disabled={!canEdit}
@@ -188,7 +251,6 @@ export default function Middlewares() {
               </ActionIcon>
               <ActionIcon
                 variant="subtle"
-                size="sm"
                 color={canEdit ? 'red' : 'gray'}
                 onClick={() => canEdit && handleDelete(protocol, middleware)}
                 disabled={!canEdit}
@@ -198,42 +260,6 @@ export default function Middlewares() {
               </ActionIcon>
             </Group>
           </Group>
-        </Card.Section>
-
-        <Card.Section p="lg" pt="xs">
-          <Stack gap="sm">
-            {/* Internal middleware note */}
-            {middleware.provider === 'internal' && (
-              <Alert icon={<IconInfoCircle size={16} />} color="blue" variant="light">
-                <Text size="xs">Internal resource managed automatically by Traefik. Cannot be modified or deleted.</Text>
-              </Alert>
-            )}
-
-            {/* External provider note */}
-            {middleware.source !== 'database' && middleware.provider !== 'internal' && (
-              <Alert icon={<IconInfoCircle size={16} />} color="gray" variant="light">
-                <Text size="xs">
-                  Managed by the <strong>{middleware.provider}</strong> provider. Modifications must be made through the provider's configuration.
-                </Text>
-              </Alert>
-            )}
-
-            <Group justify="space-between">
-              <Text size="xs" fw={600} c="dimmed" tt="uppercase">
-                Configuration
-              </Text>
-              <StatusIcon
-                enabled={middleware.enabled}
-                enabledLabel="Enabled"
-                disabledLabel="Disabled"
-              />
-            </Group>
-            <Paper p="sm" radius="sm" bg="gray.0">
-              <Code block style={{ maxHeight: '150px', overflow: 'auto' }}>
-                {JSON.stringify(middlewareConfig, null, 2)}
-              </Code>
-            </Paper>
-          </Stack>
         </Card.Section>
       </Card>
     )
@@ -326,6 +352,17 @@ export default function Middlewares() {
           </Stack>
         </Card>
       </Stack>
+
+      {viewResource && (
+        <ResourceViewModal
+          opened={viewModalOpened}
+          onClose={() => setViewModalOpened(false)}
+          protocol={viewResource.protocol as any}
+          type="middlewares"
+          resourceName={viewResource.resource.name}
+          config={viewResource.resource.config}
+        />
+      )}
     </Container>
   )
 }
