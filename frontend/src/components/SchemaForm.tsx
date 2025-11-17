@@ -188,7 +188,7 @@ export function SchemaForm({
     const specialField = isSpecialField(key, prop)
     const label = getFieldLabel(key, prop)
 
-    console.log(key, prop, path, isRequired, specialField, label, fieldValue);
+    // console.log(key, prop, path, isRequired, specialField, label, fieldValue);
 
     // Special case: middlewares array
     if (specialField === 'middlewares') {
